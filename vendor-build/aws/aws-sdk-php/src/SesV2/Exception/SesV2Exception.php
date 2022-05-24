@@ -1,0 +1,11 @@
+<?php
+
+namespace ExpressionEngine\Dependency\Aws\SesV2\Exception;
+
+use ExpressionEngine\Dependency\Aws\Exception\AwsException;
+/**
+ * Represents an error interacting with the **Amazon Simple Email Service** service.
+ */
+class SesV2Exception extends AwsException
+{
+}

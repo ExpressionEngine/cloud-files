@@ -1,0 +1,40 @@
+{
+    "name": "expressionengine/cloudfiles",
+    "description": "ExpressionEngine",
+    "homepage": "https://expressionengine.com",
+    "license": "Apache-2.0",
+    "type": "project",
+    "authors": [{
+        "name": "Packet Tide",
+        "homepage": "https://packettide.com/"
+    }],
+    "require": {
+        "php": "^7.2 || ^8.0",
+        "bamarni/composer-bin-plugin": "^1.5",
+        "league/flysystem": "^1.0",
+        "league/flysystem-aws-s3-v3": "^1.0"
+    },
+    "config": {
+        "prepend-autoloader": false,
+        "platform": {
+            "php": "7.2.5"
+        },
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@composer bin all install --ansi",
+            "@prefix-dependencies"
+        ],
+        "post-update-cmd": [
+            "@composer bin all update --ansi",
+            "@prefix-dependencies"
+        ],
+        "prefix-dependencies": [
+            "vendor/bin/php-scoper add-prefix --output-dir=./vendor-build --force --quiet",
+            "COMPOSER_VENDOR_DIR=vendor-build composer dump-autoload"
+        ]
+    }
+}

@@ -11,7 +11,7 @@ ee('Filesystem/Adapter')->registerAdapter('s3', [
                 'title' => 'Key',
                 'desc' => 'Enter your AWS S3 Key',
                 'fields' => [
-                    'url' => [
+                    'adapter_settings[key]' => [
                         'type' => 'text',
                         'value' => $values['key'] ?? '',
                         'required' => true
@@ -22,7 +22,7 @@ ee('Filesystem/Adapter')->registerAdapter('s3', [
                 'title' => 'Secret',
                 'desc' => 'Enter your AWS S3 Secret',
                 'fields' => [
-                    'url' => [
+                    'adapter_settings[secret]' => [
                         'type' => 'text',
                         'value' => $values['secret'] ?? '',
                         'required' => true
@@ -33,7 +33,7 @@ ee('Filesystem/Adapter')->registerAdapter('s3', [
                 'title' => 'Region',
                 'desc' => 'Select the region for your AWS S3 Bucket',
                 'fields' => [
-                    'url' => [
+                    'adapter_settings[region]' => [
                         'type' => 'dropdown',
                         'choices' => \CloudFiles\Adapter\AwsS3::listAvailableRegions(),
                         'value' => $values['region'] ?? '',
@@ -45,9 +45,20 @@ ee('Filesystem/Adapter')->registerAdapter('s3', [
                 'title' => 'Bucket Name',
                 'desc' => 'Enter the name of your AWS S3 Bucket',
                 'fields' => [
-                    'url' => [
+                    'adapter_settings[bucket]' => [
                         'type' => 'text',
                         'value' => $values['bucket'] ?? '',
+                        'required' => true
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Path',
+                'desc' => 'Enter the path inside your AWS S3 Bucket',
+                'fields' => [
+                    'adapter_settings[path]' => [
+                        'type' => 'text',
+                        'value' => $values['path'] ?? '',
                         'required' => true
                     ]
                 ]

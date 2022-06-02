@@ -52,4 +52,13 @@ class AwsS3 extends Flysystem\AwsS3v3\AwsS3Adapter {
         ];
     }
 
+    public function getBaseUrl()
+    {
+        return implode('/', array_filter([
+            'https://s3.amazonaws.com',
+            $this->getBucket(),
+            $this->getPathPrefix()
+        ]));
+    }
+
 }

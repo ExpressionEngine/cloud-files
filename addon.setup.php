@@ -56,10 +56,21 @@ ee('Filesystem/Adapter')->registerAdapter('s3', [
                 'title' => 'Path',
                 'desc' => 'Enter the path inside your AWS S3 Bucket',
                 'fields' => [
-                    'adapter_settings[path]' => [
+                    'server_path' => [
                         'type' => 'text',
-                        'value' => $values['path'] ?? '',
-                        'required' => true
+                        'value' => $values['server_path'] ?? '',
+                        'required' => false
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Url',
+                'desc' => 'Enter the url used to access your AWS S3 Bucket',
+                'fields' => [
+                    'url' => [
+                        'type' => 'text',
+                        'value' => $values['url'] ?? '',
+                        'required' => false
                     ]
                 ]
             ]

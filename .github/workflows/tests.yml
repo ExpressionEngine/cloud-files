@@ -1,0 +1,217 @@
+name: Tests
+
+on:
+  push:
+
+jobs:
+    
+    # eventually we may want to skip the build process and just take a distributable file
+    # and copy over the tests/cypress folder from the EE source repo
+    build-for-testing:
+        name: Build EE for testing
+
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+            with:
+              path: 'cloud_files'
+
+          # - name: Checkout ExpressionEngine
+          #   uses: actions/checkout@v2
+          #   with:
+          #     repository: ExpressionEngine/ExpressionEngine
+          #     ref: '7.x'
+          #     path: 'ee'
+          
+          - name: Checkout ExpressionEngine
+            uses: actions/checkout@v2
+            with:
+              repository: packettide/expressionengine-private
+              ref: '7.dev'
+              path: 'ee'
+              token: ${{ secrets.ORG_ACCESS_TOKEN }}
+          
+          - name: Cache repository info
+            uses: actions/cache@v2
+            with:
+              path: ee/.git
+              key: cache-ee-git-${{ github.sha }}
+  
+          - name: Setup PHP
+            uses: shivammathur/setup-php@v2
+            with:
+                php-version: '7.4'
+                extensions: dom, curl, sqlite, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, soap, intl, gd, exif, iconv, imagick
+                coverage: none
+                ini-values: error_log=/home/runner/php_errors.log, memory_limit=128M
+
+          - name: Setup node
+            uses: actions/setup-node@v2
+            with:
+              node-version: '10'
+
+          - name: Install build tool dependencies
+            working-directory: ee/build-tools
+            run: npm install
+
+          - name: Get version
+            id: build_json
+            working-directory: ee/build-tools
+            run: |
+              content=`node -pe 'JSON.parse(process.argv[1]).tag' "$(cat build.json)"`
+              echo "::set-output name=BUILD_VERSION::$content"
+
+          - name: Run build process 
+            working-directory: ee/build-tools
+            env:
+              RELEASE_KEY: ${{ secrets.RELEASE_KEY }}
+              RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+              APP_REPO_PATH: ${{ github.workspace }}/ee
+            run: gulp build-app --local --nogit --head --skip-lint --skip-pro --version=${{ steps.build_json.outputs.BUILD_VERSION }}
+
+          - name: Rename build directory
+            working-directory: ee/build-tools/builds
+            run: |
+              mv ExpressionEngine${{ steps.build_json.outputs.BUILD_VERSION }} ExpressionEngine
+
+          - name: Copy Addon files
+            run: |
+              cp -R cloud_files ee/build-tools/builds/ExpressionEngine/system/user/addons/
+          
+          - name: Copy Addon test files
+            run: cp -R cloud_files/tests/cypress/cypress/integration/. ee/build-tools/builds/ExpressionEngine/tests/cypress/cypress/integration/
+          
+          - name: Directory Listing
+            run: |
+              ls -la ee/build-tools/builds/ExpressionEngine/system/user/addons
+              ls -la ee/build-tools/builds/ExpressionEngine/tests/cypress/cypress/integration
+
+          - name: Cache built EE version
+            uses: actions/cache@v2
+            with:
+              path: ee/build-tools/builds/ExpressionEngine
+              key: cache-ee-build-${{ github.sha }}
+          
+          - name: Directory Listing on Failure
+            if: failure()
+            run: |
+              ls -latr ee/build-tools/builds
+              ls -latr ee/build-tools/builds/ExpressionEngine
+
+    cypress:
+        needs: [build-for-testing]
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [7.2, 7.4, 8.0, 8.1]
+                os: [ubuntu-latest]
+
+        name: Cypress Tests, PHP${{ matrix.php }} - ${{ matrix.os }}
+        steps:
+
+            - name: Use cached EE build
+              uses: actions/cache@v2
+              with:
+                path: ee/build-tools/builds/ExpressionEngine
+                key: cache-ee-build-${{ github.sha }}
+
+            - name: Move files to webroot
+              run: |
+                ls -lar ee/build-tools/builds/ExpressionEngine/
+                cp -R ee/build-tools/builds/ExpressionEngine/. ./
+            
+            - name: Restore cached git history
+              uses: actions/cache@v2
+              with:
+                path: ee/.git
+                key: cache-ee-git-${{ github.sha }}
+
+            - name: Directory Listing
+              run: |
+                ls -lar ./
+                ls -lar ./tests/cypress/cypress/integration
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  extensions: dom, curl, sqlite, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, soap, intl, gd, exif, iconv, imagick
+                  coverage: none
+                  ini-values: error_log=/home/runner/php_errors.log, memory_limit=128M
+
+            - name: Copy config.php
+              run: |
+                rm -f system/user/config/config.php
+                cp -f tests/cypress/support/config/config.php system/user/config/config.php
+
+            - name: Copy .env.php
+              run: |
+                rm -f .env.php
+                cp -f tests/cypress/support/config/.env.php .env.php
+
+            - name: Remove installer
+              run: |
+                mv system/ee/installer system/ee/_installer
+
+            - name: Setup Permissions
+              run: |
+                sudo chmod 666 system/user/config/config.php
+                sudo chmod 777 system/user/config
+                sudo chmod -R 777 system/user/cache
+                sudo chmod -R 777 system/user/templates
+                sudo chmod -R 777 system/user/language
+                sudo chmod -R 777 tests/cypress/support/tmp
+                sudo chmod -R 777 tests/cypress/support/file-sync/uploads
+                sudo chmod -R 777 images
+                sudo chmod -R 777 themes/user
+                sudo chmod -R 777 tests/cypress/cypress/screenshots
+
+            - name: Configure MySQL
+              run: |
+                sudo systemctl start mysql
+                mysql -u root -proot -e 'CREATE DATABASE `ee-test`;'
+                mysql -u root -proot -e 'SET GLOBAL sql_mode="ONLY_FULL_GROUP_BY,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION";'
+
+            - name: Install Testing PHP dependencies
+              working-directory: tests/cypress
+              run: composer install
+
+            - name: Start PHP Server
+              run: php tests/serve.php &
+
+            # - name: Start SMTP Server
+            #   run: |
+            #     npm install -g maildev
+            #     maildev &
+
+            - name: Run Cypress Tests
+              uses: cypress-io/github-action@v2
+              with:
+                spec: cypress/integration/addon_cloud_files/**
+                browser: chrome
+                headless: true
+                working-directory: tests/cypress
+                config-file: cypress.json
+              env:
+                CYPRESS_AWS_S3_KEY: ${{secrets.AWS_S3_KEY}}
+                CYPRESS_AWS_S3_SECRET: ${{secrets.AWS_S3_SECRET}}
+                CYPRESS_AWS_S3_REGION: ${{secrets.AWS_S3_REGION}}
+                CYPRESS_AWS_S3_BUCKET: ${{secrets.AWS_S3_BUCKET}}
+                CYPRESS_S3_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
+
+            - name: Archive screenshots
+              uses: actions/upload-artifact@v2
+              if: failure()
+              with:
+                name: cypress-tests-PHP${{ matrix.php }}
+                path: tests/cypress/cypress/screenshots/
+
+            - name: Archive server errors
+              uses: actions/upload-artifact@v2
+              if: failure()
+              with:
+                name: error.PHP${{ matrix.php }}.log
+                path: /home/runner/php_errors.log

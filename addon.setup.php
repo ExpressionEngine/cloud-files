@@ -9,7 +9,7 @@ return array(
     'description' => '',
     'version' => '1.0.0',
     'namespace' => 'CloudFiles',
-    'settings_exist' => true,
+    'settings_exist' => false,
     'filesystem_adapters' => [
         \CloudFiles\Adapter\AwsS3::class,
         \CloudFiles\Adapter\DigitalOcean::class

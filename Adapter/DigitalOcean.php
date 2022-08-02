@@ -28,11 +28,107 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             'exception_class' => \ExpressionEngine\Dependency\Aws\S3\Exception\S3Exception::class
         ]);
 
-        parent::__construct($client, $settings['bucket']);
+        parent::__construct($client, $settings['space']);
     }
 
     public static function getSettingsForm($settings)
     {
-        return [];
+        return [
+            [
+                'title' => 'Key',
+                'desc' => 'Enter your Digital Ocean Key',
+                'fields' => [
+                    'adapter_settings[key]' => [
+                        'type' => 'text',
+                        'value' => $settings['key'] ?? '',
+                        'required' => true
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Secret',
+                'desc' => 'Enter your Digital Ocean Secret',
+                'fields' => [
+                    'adapter_settings[secret]' => [
+                        'type' => 'text',
+                        'value' => $settings['secret'] ?? '',
+                        'required' => true
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Region',
+                'desc' => 'Select the region for your Digital Ocean Space',
+                'fields' => [
+                    'adapter_settings[region]' => [
+                        'type' => 'dropdown',
+                        'choices' => \CloudFiles\Adapter\DigitalOcean::listAvailableRegions(),
+                        'value' => $settings['region'] ?? '',
+                        'required' => true
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Space Name',
+                'desc' => 'Enter the name of your Digital Ocean Space',
+                'fields' => [
+                    'adapter_settings[space]' => [
+                        'type' => 'text',
+                        'value' => $settings['space'] ?? '',
+                        'required' => true
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Path',
+                'desc' => 'Enter the path inside your Digital Ocean Space',
+                'fields' => [
+                    'server_path' => [
+                        'type' => 'text',
+                        'value' => $settings['server_path'] ?? '',
+                        'required' => false
+                    ]
+                ]
+            ],
+            [
+                'title' => 'Url',
+                'desc' => 'Enter the url used to access your Digital Ocean Space',
+                'fields' => [
+                    'url' => [
+                        'type' => 'text',
+                        'value' => $settings['url'] ?? '',
+                        'required' => false
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    public static function listAvailableRegions()
+    {
+        return [
+            'nyc1' => 'NYC1 - New York City',
+            'nyc2' => 'NYC2 - New York City',
+            'nyc3' => 'NYC3 - New York City',
+            'ams2' => 'AMS2 - Amsterdam',
+            'ams3' => 'AMS3 - Amsterdam',
+            'sfo1' => 'SFO1 - San Francisco',
+            'sfo2' => 'SFO2 - San Francisco',
+            'sfo3' => 'SFO3 - San Francisco',
+            'sgp1' => 'SGP1 - Singapore',
+            'lon1' => 'LON1 - London',
+            'fra1' => 'FRA1 - Frankfurt',
+            'tor1' => 'TOR1 - Toronto',
+            'blr1' => 'BLR1 - Bangalore',
+        ];
+    }
+
+    public function getBaseUrl()
+    {
+        return implode('/', array_filter([
+            'https://'.$this->settings['region'].'.digitaloceanspaces.com',
+            $this->getBucket(),
+            $this->getPathPrefix()
+        ]));
     }
 }

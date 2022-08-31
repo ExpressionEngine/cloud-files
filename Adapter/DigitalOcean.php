@@ -36,7 +36,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
         return [
             [
                 'title' => 'Key',
-                'desc' => 'Enter your Digital Ocean Key',
+                'desc' => 'Enter your DigitalOcean Key',
                 'fields' => [
                     'adapter_settings[key]' => [
                         'type' => 'text',
@@ -47,7 +47,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             ],
             [
                 'title' => 'Secret',
-                'desc' => 'Enter your Digital Ocean Secret',
+                'desc' => 'Enter your DigitalOcean Secret',
                 'fields' => [
                     'adapter_settings[secret]' => [
                         'type' => 'text',
@@ -58,7 +58,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             ],
             [
                 'title' => 'Region',
-                'desc' => 'Select the region for your Digital Ocean Space',
+                'desc' => 'Select the region for your DigitalOcean Space',
                 'fields' => [
                     'adapter_settings[region]' => [
                         'type' => 'dropdown',
@@ -70,7 +70,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             ],
             [
                 'title' => 'Space Name',
-                'desc' => 'Enter the name of your Digital Ocean Space',
+                'desc' => 'Enter the name of your DigitalOcean Space',
                 'fields' => [
                     'adapter_settings[space]' => [
                         'type' => 'text',
@@ -81,7 +81,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             ],
             [
                 'title' => 'Path',
-                'desc' => 'Enter the path inside your Digital Ocean Space',
+                'desc' => 'Enter the path inside your DigitalOcean Space',
                 'fields' => [
                     'server_path' => [
                         'type' => 'text',
@@ -92,7 +92,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             ],
             [
                 'title' => 'Url',
-                'desc' => 'Enter the url used to access your Digital Ocean Space',
+                'desc' => 'Enter the url used to access your DigitalOcean Space',
                 'fields' => [
                     'url' => [
                         'type' => 'text',

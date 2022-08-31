@@ -24,7 +24,7 @@ context('Basic Addon Test', () => {
         uploadPage.load()
 
         uploadPage.get('adapter').find('.dropdown').contains('AWS S3')
-        uploadPage.get('adapter').find('.dropdown').contains('Digital Ocean Spaces')
+        uploadPage.get('adapter').find('.dropdown').contains('DigitalOcean Spaces')
 
     })
 

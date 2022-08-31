@@ -12,7 +12,12 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
 {
     use AdapterTrait;
 
-    protected $_validation_rules = [];
+    protected $_validation_rules = [
+        'key' => 'required',
+        'secret' => 'required',
+        'region' => 'required',
+        'space' => 'required',
+    ];
 
     public function __construct($settings = [])
     {

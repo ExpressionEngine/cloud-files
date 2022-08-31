@@ -200,7 +200,11 @@ jobs:
                 CYPRESS_AWS_S3_SECRET: ${{secrets.AWS_S3_SECRET}}
                 CYPRESS_AWS_S3_REGION: ${{secrets.AWS_S3_REGION}}
                 CYPRESS_AWS_S3_BUCKET: ${{secrets.AWS_S3_BUCKET}}
-                CYPRESS_S3_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
+                CYPRESS_DO_SPACES_KEY: ${{secrets.DO_SPACES_KEY}}
+                CYPRESS_DO_SPACES_SECRET: ${{secrets.DO_SPACES_SECRET}}
+                CYPRESS_DO_SPACES_REGION: ${{secrets.DO_SPACES_REGION}}
+                CYPRESS_DO_SPACES_SPACE: ${{secrets.DO_SPACES_SPACE}}
+                CYPRESS_CF_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
 
             - name: Archive screenshots
               uses: actions/upload-artifact@v2

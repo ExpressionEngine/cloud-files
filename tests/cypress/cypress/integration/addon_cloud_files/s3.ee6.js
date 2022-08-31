@@ -12,7 +12,7 @@ const s3_settings = {
     secret: Cypress.env('AWS_S3_SECRET'),
     region: Cypress.env('AWS_S3_REGION'),
     bucket: Cypress.env('AWS_S3_BUCKET'),
-    folder: Cypress.env('S3_TEST_FOLDER') +'/',
+    folder: Cypress.env('CF_TEST_FOLDER') +'/',
 }
 
 context('AWS S3 Adapter Test', () => {

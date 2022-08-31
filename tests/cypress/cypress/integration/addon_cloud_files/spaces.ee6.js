@@ -12,7 +12,7 @@ const spaces_settings = {
     secret: Cypress.env('DO_SPACES_SECRET'),
     region: Cypress.env('DO_SPACES_REGION'),
     space: Cypress.env('DO_SPACES_SPACE'),
-    folder: 'cypress/',
+    folder: Cypress.env('CF_TEST_FOLDER') +'/',
 }
 
 context('DO Spaces Adapter Test', () => {

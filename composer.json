@@ -34,7 +34,8 @@
         ],
         "prefix-dependencies": [
             "vendor/bin/php-scoper add-prefix --output-dir=./vendor-build --force --quiet",
-            "COMPOSER_VENDOR_DIR=vendor-build composer dump-autoload"
+            "COMPOSER_VENDOR_DIR=vendor-build composer dump-autoload",
+            "php scoper.fix.php"
         ]
     }
 }

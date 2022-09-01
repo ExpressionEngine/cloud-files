@@ -27,9 +27,11 @@ jobs:
               include: "cloud_files/addon.setup.php"
               regex: true
 
-          - name: Remove tests
+          - name: Remove development files
             working-directory: cloud_files
-            run: rm -rf tests
+            run: |
+              rm -rf tests
+              rm -rf .github
 
           - name: Archive Add-on
             uses: actions/upload-artifact@v2

@@ -8,7 +8,7 @@ use ExpressionEngine\Library\Filesystem\Adapter\AdapterInterface;
 use ExpressionEngine\Library\Filesystem\Adapter\AdapterTrait;
 use ExpressionEngine\Service\Validation\ValidationAware;
 
-class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInterface, ValidationAware
+class DigitalOcean extends AbstractS3 implements AdapterInterface, ValidationAware
 {
     use AdapterTrait;
 
@@ -125,6 +125,7 @@ class DigitalOcean extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInte
             'fra1' => 'FRA1 - Frankfurt',
             'tor1' => 'TOR1 - Toronto',
             'blr1' => 'BLR1 - Bangalore',
+            'syd1' => 'SYD1 - Sydney',
         ];
     }
 

@@ -3,7 +3,6 @@
 namespace ExpressionEngine\Dependency\Aws\Endpoint\UseFipsEndpoint;
 
 use ExpressionEngine\Dependency\Aws;
-use ExpressionEngine\Dependency\Aws\ClientResolver;
 use ExpressionEngine\Dependency\Aws\Endpoint\UseFipsEndpoint\Exception\ConfigurationException;
 class Configuration implements ConfigurationInterface
 {

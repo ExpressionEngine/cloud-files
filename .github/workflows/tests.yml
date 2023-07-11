@@ -17,6 +17,7 @@ jobs:
             with:
               path: 'cloud_files'
 
+<<<<<<< HEAD
           # - name: Checkout ExpressionEngine
           #   uses: actions/checkout@v2
           #   with:
@@ -24,13 +25,18 @@ jobs:
           #     ref: '7.x'
           #     path: 'ee'
 
+=======
+>>>>>>> f70e53d (Allow tests to toggle storing artifacts)
           - name: Checkout ExpressionEngine
             uses: actions/checkout@v2
             with:
-              repository: packettide/expressionengine-private
-              ref: '7.dev'
+              repository: ExpressionEngine/ExpressionEngine
+              ref: '7.x'
               path: 'ee'
+<<<<<<< HEAD
               token: ${{ secrets.ORG_ACCESS_TOKEN }}
+=======
+>>>>>>> f70e53d (Allow tests to toggle storing artifacts)
 
           - name: Cache repository info
             uses: actions/cache@v2
@@ -200,18 +206,30 @@ jobs:
                 CYPRESS_DO_SPACES_REGION: ${{secrets.DO_SPACES_REGION}}
                 CYPRESS_DO_SPACES_SPACE: ${{secrets.DO_SPACES_SPACE}}
                 CYPRESS_CF_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
+<<<<<<< HEAD
                 CYPRESS_KEEP_DEBUG: ${{env.KEEP_DEBUG !== 'false'}}
 
             - name: Archive screenshots
               uses: actions/upload-artifact@v2
               if: env.KEEP_DEBUG !== 'false' && failure()
+=======
+                CYPRESS_KEEP_DEBUG: ${{vars.KEEP_DEBUG != 'false'}}
+
+            - name: Archive screenshots
+              uses: actions/upload-artifact@v2
+              if: vars.KEEP_DEBUG != 'false' && failure()
+>>>>>>> f70e53d (Allow tests to toggle storing artifacts)
               with:
                 name: cypress-tests-PHP${{ matrix.php }}
                 path: tests/cypress/cypress/screenshots/
 
             - name: Archive server errors
               uses: actions/upload-artifact@v2
+<<<<<<< HEAD
               if: env.KEEP_DEBUG !== 'false' && failure()
+=======
+              if: vars.KEEP_DEBUG != 'false' && failure()
+>>>>>>> f70e53d (Allow tests to toggle storing artifacts)
               with:
                 name: error.PHP${{ matrix.php }}.log
                 path: /home/runner/php_errors.log

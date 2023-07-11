@@ -3,6 +3,7 @@
 namespace ExpressionEngine\Dependency\Aws\Signature;
 
 use ExpressionEngine\Dependency\Aws\Exception\UnresolvedSignatureException;
+use ExpressionEngine\Dependency\Aws\Token\BearerTokenAuthorization;
 /**
  * Signature providers.
  *
@@ -40,7 +41,7 @@ use ExpressionEngine\Dependency\Aws\Exception\UnresolvedSignatureException;
  */
 class SignatureProvider
 {
-    private static $s3v4SignedServices = ['s3' => \true, 's3control' => \true];
+    private static $s3v4SignedServices = ['s3' => \true, 's3control' => \true, 's3-object-lambda' => \true];
     /**
      * Resolves and signature provider and ensures a non-null return value.
      *
@@ -55,7 +56,7 @@ class SignatureProvider
     public static function resolve(callable $provider, $version, $service, $region)
     {
         $result = $provider($version, $service, $region);
-        if ($result instanceof SignatureInterface) {
+        if ($result instanceof SignatureInterface || $result instanceof BearerTokenAuthorization) {
             return $result;
         }
         throw new UnresolvedSignatureException("Unable to resolve a signature for {$version}/{$service}/{$region}.\n" . "Valid signature versions include v4 and anonymous.");
@@ -107,9 +108,11 @@ class SignatureProvider
                 case 'v4':
                     return !empty(self::$s3v4SignedServices[$service]) ? new S3SignatureV4($service, $region) : new SignatureV4($service, $region);
                 case 'v4a':
-                    return new SignatureV4($service, $region, ['use_v4a' => \true]);
+                    return !empty(self::$s3v4SignedServices[$service]) ? new S3SignatureV4($service, $region, ['use_v4a' => \true]) : new SignatureV4($service, $region, ['use_v4a' => \true]);
                 case 'v4-unsigned-body':
                     return !empty(self::$s3v4SignedServices[$service]) ? new S3SignatureV4($service, $region, ['unsigned-body' => 'true']) : new SignatureV4($service, $region, ['unsigned-body' => 'true']);
+                case 'bearer':
+                    return new BearerTokenAuthorization();
                 case 'anonymous':
                     return new AnonymousSignature();
                 default:

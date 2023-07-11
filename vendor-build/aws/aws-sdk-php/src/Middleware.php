@@ -5,7 +5,10 @@ namespace ExpressionEngine\Dependency\Aws;
 use ExpressionEngine\Dependency\Aws\Api\Service;
 use ExpressionEngine\Dependency\Aws\Api\Validator;
 use ExpressionEngine\Dependency\Aws\Credentials\CredentialsInterface;
+use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointProviderV2;
 use ExpressionEngine\Dependency\Aws\Exception\AwsException;
+use ExpressionEngine\Dependency\Aws\Token\TokenAuthorization;
+use ExpressionEngine\Dependency\Aws\Token\TokenInterface;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7\LazyOpenStream;
@@ -48,6 +51,9 @@ final class Middleware
         $validator = $validator ?: new Validator();
         return function (callable $handler) use($api, $validator) {
             return function (CommandInterface $command, RequestInterface $request = null) use($api, $validator, $handler) {
+                if ($api->isModifiedModel()) {
+                    $api = new Service($api->getDefinition(), $api->getProvider());
+                }
                 $operation = $api->getOperation($command->getName());
                 $validator->validate($command->getName(), $operation->getInput(), $command->toArray());
                 return $handler($command, $request);
@@ -59,13 +65,15 @@ final class Middleware
      *
      * @param callable $serializer Function used to serialize a request for a
      *                             command.
+     * @param EndpointProviderV2 | null $endpointProvider
+     * @param array $providerArgs
      * @return callable
      */
-    public static function requestBuilder(callable $serializer)
+    public static function requestBuilder($serializer, $endpointProvider = null, array $providerArgs = null)
     {
-        return function (callable $handler) use($serializer) {
-            return function (CommandInterface $command) use($serializer, $handler) {
-                return $handler($command, $serializer($command));
+        return function (callable $handler) use($serializer, $endpointProvider, $providerArgs) {
+            return function (CommandInterface $command) use($serializer, $handler, $endpointProvider, $providerArgs) {
+                return $handler($command, $serializer($command, $endpointProvider, $providerArgs));
             };
         };
     }
@@ -81,14 +89,20 @@ final class Middleware
      *
      * @return callable
      */
-    public static function signer(callable $credProvider, callable $signatureFunction)
+    public static function signer(callable $credProvider, callable $signatureFunction, $tokenProvider = null)
     {
-        return function (callable $handler) use($signatureFunction, $credProvider) {
-            return function (CommandInterface $command, RequestInterface $request) use($handler, $signatureFunction, $credProvider) {
+        return function (callable $handler) use($signatureFunction, $credProvider, $tokenProvider) {
+            return function (CommandInterface $command, RequestInterface $request) use($handler, $signatureFunction, $credProvider, $tokenProvider) {
                 $signer = $signatureFunction($command);
-                return $credProvider()->then(function (CredentialsInterface $creds) use($handler, $command, $signer, $request) {
-                    return $handler($command, $signer->signRequest($request, $creds));
-                });
+                if ($signer instanceof TokenAuthorization) {
+                    return $tokenProvider()->then(function (TokenInterface $token) use($handler, $command, $signer, $request) {
+                        return $handler($command, $signer->authorizeRequest($request, $token));
+                    });
+                } else {
+                    return $credProvider()->then(function (CredentialsInterface $creds) use($handler, $command, $signer, $request) {
+                        return $handler($command, $signer->signRequest($request, $creds));
+                    });
+                }
             };
         };
     }
@@ -190,10 +204,16 @@ final class Middleware
         return function (callable $handler) {
             return function (CommandInterface $command, RequestInterface $request) use($handler) {
                 $isLambda = \getenv('AWS_LAMBDA_FUNCTION_NAME');
-                $traceId = \str_replace('\\e', '\\x1b', \getenv('_X_AMZ_TRACE_ID'));
+                $traceId = \str_replace('\\e', '\\x1b', \getenv('_X_AMZN_TRACE_ID'));
                 if ($isLambda && $traceId) {
                     if (!$request->hasHeader('X-Amzn-Trace-Id')) {
-                        return $handler($command, $request->withHeader('X-Amzn-Trace-Id', \rawurlencode(\stripcslashes($traceId))));
+                        $ignoreChars = ['=', ';', ':', '+', '&', '[', ']', '{', '}', '"', '\'', ','];
+                        $traceIdEncoded = \rawurlencode(\stripcslashes($traceId));
+                        foreach ($ignoreChars as $char) {
+                            $encodedChar = \rawurlencode($char);
+                            $traceIdEncoded = \str_replace($encodedChar, $char, $traceIdEncoded);
+                        }
+                        return $handler($command, $request->withHeader('X-Amzn-Trace-Id', $traceIdEncoded));
                     }
                 }
                 return $handler($command, $request);

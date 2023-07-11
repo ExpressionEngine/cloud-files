@@ -23,7 +23,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
     /**
      * @var array
      */
-    protected static $metaOptions = ['ACL', 'CacheControl', 'ContentDisposition', 'ContentEncoding', 'ContentLength', 'ContentType', 'Expires', 'GrantFullControl', 'GrantRead', 'GrantReadACP', 'GrantWriteACP', 'Metadata', 'RequestPayer', 'SSECustomerAlgorithm', 'SSECustomerKey', 'SSECustomerKeyMD5', 'SSEKMSKeyId', 'ServerSideEncryption', 'StorageClass', 'Tagging', 'WebsiteRedirectLocation'];
+    protected static $metaOptions = ['ACL', 'CacheControl', 'ContentDisposition', 'ContentEncoding', 'ContentLength', 'ContentMD5', 'ContentType', 'Expires', 'GrantFullControl', 'GrantRead', 'GrantReadACP', 'GrantWriteACP', 'Metadata', 'RequestPayer', 'SSECustomerAlgorithm', 'SSECustomerKey', 'SSECustomerKeyMD5', 'SSEKMSKeyId', 'ServerSideEncryption', 'StorageClass', 'Tagging', 'WebsiteRedirectLocation'];
     /**
      * @var S3ClientInterface
      */
@@ -216,7 +216,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
      */
     protected function retrievePaginatedListing(array $options)
     {
-        $resultPaginator = $this->s3Client->getPaginator('ListObjects', $options);
+        $resultPaginator = $this->s3Client->getPaginator('ListObjectsV2', $options);
         $listing = [];
         foreach ($resultPaginator as $result) {
             $listing = \array_merge($listing, $result->get('Contents') ?: [], $result->get('CommonPrefixes') ?: []);
@@ -410,7 +410,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
      */
     public function setPathPrefix($prefix)
     {
-        $prefix = \ltrim($prefix, '/');
+        $prefix = \ltrim((string) $prefix, '/');
         return parent::setPathPrefix($prefix);
     }
     /**
@@ -537,7 +537,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
     {
         // Maybe this isn't an actual key, but a prefix.
         // Do a prefix listing of objects to determine.
-        $command = $this->s3Client->getCommand('listObjects', ['Bucket' => $this->bucket, 'Prefix' => \rtrim($location, '/') . '/', 'MaxKeys' => 1]);
+        $command = $this->s3Client->getCommand('ListObjectsV2', ['Bucket' => $this->bucket, 'Prefix' => \rtrim($location, '/') . '/', 'MaxKeys' => 1]);
         try {
             $result = $this->s3Client->execute($command);
             return $result['Contents'] || $result['CommonPrefixes'];

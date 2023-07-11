@@ -3,6 +3,7 @@
 namespace ExpressionEngine\Dependency\Aws;
 
 use ExpressionEngine\Dependency\Aws\Api\Parser\Exception\ParserException;
+use ExpressionEngine\Dependency\Aws\Exception\AwsException;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise;
 use ExpressionEngine\Dependency\Psr\Http\Message\RequestInterface;
 use ExpressionEngine\Dependency\Psr\Http\Message\ResponseInterface;
@@ -42,7 +43,7 @@ class WrappedHttpHandler
      * @param bool     $collectStats   Whether to collect HTTP transfer
      *                                 information.
      */
-    public function __construct(callable $httpHandler, callable $parser, callable $errorParser, $exceptionClass = 'ExpressionEngine\\Dependency\\Aws\\Exception\\AwsException', $collectStats = \false)
+    public function __construct(callable $httpHandler, callable $parser, callable $errorParser, $exceptionClass = AwsException::class, $collectStats = \false)
     {
         $this->httpHandler = $httpHandler;
         $this->parser = $parser;

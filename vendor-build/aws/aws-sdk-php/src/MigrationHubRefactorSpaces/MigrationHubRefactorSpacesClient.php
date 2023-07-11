@@ -51,6 +51,8 @@ use ExpressionEngine\Dependency\Aws\AwsClient;
  * @method \GuzzleHttp\Promise\Promise tagResourceAsync(array $args = [])
  * @method \Aws\Result untagResource(array $args = [])
  * @method \GuzzleHttp\Promise\Promise untagResourceAsync(array $args = [])
+ * @method \Aws\Result updateRoute(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise updateRouteAsync(array $args = [])
  */
 class MigrationHubRefactorSpacesClient extends AwsClient
 {

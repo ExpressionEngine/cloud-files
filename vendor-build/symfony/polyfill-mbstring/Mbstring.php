@@ -73,7 +73,7 @@ final class Mbstring
     private static $internalEncoding = 'UTF-8';
     public static function mb_convert_encoding($s, $toEncoding, $fromEncoding = null)
     {
-        if (\is_array($fromEncoding) || $fromEncoding !== null && \false !== \strpos($fromEncoding, ',')) {
+        if (\is_array($fromEncoding) || null !== $fromEncoding && \false !== \strpos($fromEncoding, ',')) {
             $fromEncoding = self::mb_detect_encoding($s, $fromEncoding);
         } else {
             $fromEncoding = self::getEncoding($fromEncoding);
@@ -464,7 +464,7 @@ final class Mbstring
                 $split_length -= 65535;
             }
             $rx .= '.{' . $split_length . '})/us';
-            return \preg_split($rx, $string, null, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
+            return \preg_split($rx, $string, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
         }
         $result = [];
         $length = \mb_strlen($string, $encoding);

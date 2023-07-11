@@ -3,7 +3,7 @@
 namespace ExpressionEngine\Dependency\Aws;
 
 use ExpressionEngine\Dependency\Aws\Exception\AwsException;
-use ExpressionEngine\Dependency\GuzzleHttp\Promise;
+use ExpressionEngine\Dependency\GuzzleHttp\Promise\Coroutine;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise\PromisorInterface;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise\RejectedPromise;
 /**
@@ -63,9 +63,12 @@ class Waiter implements PromisorInterface
             throw new \InvalidArgumentException('The provided "before" callback is not callable.');
         }
     }
+    /**
+     * @return Coroutine
+     */
     public function promise()
     {
-        return Promise\Coroutine::of(function () {
+        return Coroutine::of(function () {
             $name = $this->config['operation'];
             for ($state = 'retry', $attempt = 1; $state === 'retry'; $attempt++) {
                 // Execute the operation.

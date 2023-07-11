@@ -22,7 +22,7 @@ abstract class AbstractUploadManager implements Promise\PromisorInterface
 {
     const DEFAULT_CONCURRENCY = 5;
     /** @var array Default values for base multipart configuration */
-    private static $defaultConfig = ['part_size' => null, 'state' => null, 'concurrency' => self::DEFAULT_CONCURRENCY, 'prepare_data_source' => null, 'before_initiate' => null, 'before_upload' => null, 'before_complete' => null, 'exception_class' => 'ExpressionEngine\\Dependency\\Aws\\Exception\\MultipartUploadException'];
+    private static $defaultConfig = ['part_size' => null, 'state' => null, 'concurrency' => self::DEFAULT_CONCURRENCY, 'prepare_data_source' => null, 'before_initiate' => null, 'before_upload' => null, 'before_complete' => null, 'exception_class' => MultipartUploadException::class];
     /** @var Client Client used for the upload. */
     protected $client;
     /** @var array Configuration used to perform the upload. */

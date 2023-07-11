@@ -2,6 +2,7 @@
 
 namespace ExpressionEngine\Dependency\Aws;
 
+use ExpressionEngine\Dependency\GuzzleHttp\Promise\PromiseInterface;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise\PromisorInterface;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise\EachPromise;
 /**
@@ -64,7 +65,7 @@ class CommandPool implements PromisorInterface
         $this->each = new EachPromise($mapFn($commands), $config);
     }
     /**
-     * @return \GuzzleHttp\Promise\PromiseInterface
+     * @return PromiseInterface
      */
     public function promise()
     {

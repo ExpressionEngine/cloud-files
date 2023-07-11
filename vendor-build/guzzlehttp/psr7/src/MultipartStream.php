@@ -13,6 +13,8 @@ final class MultipartStream implements StreamInterface
     use StreamDecoratorTrait;
     /** @var string */
     private $boundary;
+    /** @var StreamInterface */
+    private $stream;
     /**
      * @param array  $elements Array of associative arrays, each containing a
      *                         required "name" key mapping to the form field,
@@ -27,7 +29,7 @@ final class MultipartStream implements StreamInterface
      */
     public function __construct(array $elements = [], string $boundary = null)
     {
-        $this->boundary = $boundary ?: \sha1(\uniqid('', \true));
+        $this->boundary = $boundary ?: \bin2hex(\random_bytes(20));
         $this->stream = $this->createStream($elements);
     }
     public function getBoundary() : string
@@ -58,6 +60,9 @@ final class MultipartStream implements StreamInterface
     {
         $stream = new AppendStream();
         foreach ($elements as $element) {
+            if (!\is_array($element)) {
+                throw new \UnexpectedValueException("An array is expected");
+            }
             $this->addElement($stream, $element);
         }
         // Add the trailing boundary with CRLF

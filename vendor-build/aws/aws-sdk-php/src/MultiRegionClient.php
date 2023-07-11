@@ -4,6 +4,8 @@ namespace ExpressionEngine\Dependency\Aws;
 
 use ExpressionEngine\Dependency\Aws\Endpoint\PartitionEndpointProvider;
 use ExpressionEngine\Dependency\Aws\Endpoint\PartitionInterface;
+use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointProviderV2;
+use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointDefinitionProvider;
 class MultiRegionClient implements AwsClientInterface
 {
     use AwsClientTrait;
@@ -47,8 +49,9 @@ class MultiRegionClient implements AwsClientInterface
             if (!$value instanceof PartitionInterface) {
                 throw new \InvalidArgumentException('No valid partition' . ' was provided. Provide a concrete partition or' . ' the name of a partition (e.g., "aws," "aws-cn,"' . ' or "aws-us-gov").');
             }
-            $args['partition'] = $value;
-            $args['endpoint_provider'] = $value;
+            $ruleset = EndpointDefinitionProvider::getEndpointRuleset($args['service'], isset($args['version']) ? $args['version'] : 'latest');
+            $partitions = EndpointDefinitionProvider::getPartitions();
+            $args['endpoint_provider'] = new EndpointProviderV2($ruleset, $partitions);
         }]];
     }
     /**

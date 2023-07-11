@@ -18,6 +18,7 @@ use ExpressionEngine\Dependency\Psr\Http\Message\RequestInterface;
  *
  * @final
  */
+#[\AllowDynamicProperties]
 class CurlMultiHandler
 {
     /**

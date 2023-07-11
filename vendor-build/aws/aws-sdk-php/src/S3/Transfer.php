@@ -6,6 +6,7 @@ use ExpressionEngine\Dependency\Aws;
 use ExpressionEngine\Dependency\Aws\CommandInterface;
 use ExpressionEngine\Dependency\Aws\Exception\AwsException;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise;
+use ExpressionEngine\Dependency\GuzzleHttp\Promise\PromiseInterface;
 use ExpressionEngine\Dependency\GuzzleHttp\Promise\PromisorInterface;
 use Iterator;
 /**
@@ -26,6 +27,7 @@ class Transfer implements PromisorInterface
     private $mupThreshold;
     private $before;
     private $s3Args = [];
+    private $addContentMD5;
     /**
      * When providing the $source argument, you may provide a string referencing
      * the path to a directory on disk to upload, an s3 scheme URI that contains
@@ -112,9 +114,13 @@ class Transfer implements PromisorInterface
                 $this->addDebugToBefore($options['debug']);
             }
         }
+        // Handle "add_content_md5" option.
+        $this->addContentMD5 = isset($options['add_content_md5']) && $options['add_content_md5'] === \true;
     }
     /**
      * Transfers the files.
+     *
+     * @return PromiseInterface
      */
     public function promise()
     {
@@ -178,21 +184,27 @@ class Transfer implements PromisorInterface
     {
         return \rtrim(\str_replace('\\', '/', $path), '/');
     }
-    private function resolveUri($uri)
+    private function resolvesOutsideTargetDirectory($sink, $objectKey)
     {
         $resolved = [];
-        $sections = \explode('/', $uri);
-        foreach ($sections as $section) {
+        $sections = \explode('/', $sink);
+        $targetSectionsLength = \count(\explode('/', $objectKey));
+        $targetSections = \array_slice($sections, -($targetSectionsLength + 1));
+        $targetDirectory = $targetSections[0];
+        foreach ($targetSections as $section) {
             if ($section === '.' || $section === '') {
                 continue;
             }
             if ($section === '..') {
                 \array_pop($resolved);
+                if (empty($resolved) || $resolved[0] !== $targetDirectory) {
+                    return \true;
+                }
             } else {
                 $resolved[] = $section;
             }
         }
-        return ($uri[0] === '/' ? '/' : '') . \implode('/', $resolved);
+        return \false;
     }
     private function createDownloadPromise()
     {
@@ -202,14 +214,9 @@ class Transfer implements PromisorInterface
         foreach ($this->getDownloadsIterator() as $object) {
             // Prepare the sink.
             $objectKey = \preg_replace('/^' . \preg_quote($prefix, '/') . '/', '', $object);
-            $resolveSink = $this->destination['path'] . '/';
-            if (isset($parts['Key']) && \strpos($objectKey, $parts['Key']) !== 0) {
-                $resolveSink .= $parts['Key'] . '/';
-            }
-            $resolveSink .= $objectKey;
             $sink = $this->destination['path'] . '/' . $objectKey;
             $command = $this->client->getCommand('GetObject', $this->getS3Args($object) + ['@http' => ['sink' => $sink]]);
-            if (\strpos($this->resolveUri($resolveSink), $this->destination['path']) !== 0) {
+            if ($this->resolvesOutsideTargetDirectory($sink, $objectKey)) {
                 throw new AwsException('Cannot download key ' . $objectKey . ', its relative path resolves outside the' . ' parent directory', $command);
             }
             // Create the directory if needed.
@@ -269,6 +276,7 @@ class Transfer implements PromisorInterface
         $args = $this->s3Args;
         $args['SourceFile'] = $filename;
         $args['Key'] = $this->createS3Key($filename);
+        $args['AddContentMD5'] = $this->addContentMD5;
         $command = $this->client->getCommand('PutObject', $args);
         $this->before and \call_user_func($this->before, $command);
         return $this->client->executeAsync($command);
@@ -278,7 +286,7 @@ class Transfer implements PromisorInterface
         $args = $this->s3Args;
         $args['Key'] = $this->createS3Key($filename);
         $filename = $filename instanceof \SplFileInfo ? $filename->getPathname() : $filename;
-        return (new MultipartUploader($this->client, $filename, ['bucket' => $args['Bucket'], 'key' => $args['Key'], 'before_initiate' => $this->before, 'before_upload' => $this->before, 'before_complete' => $this->before, 'concurrency' => $this->concurrency]))->promise();
+        return (new MultipartUploader($this->client, $filename, ['bucket' => $args['Bucket'], 'key' => $args['Key'], 'before_initiate' => $this->before, 'before_upload' => $this->before, 'before_complete' => $this->before, 'concurrency' => $this->concurrency, 'add_content_md5' => $this->addContentMD5]))->promise();
     }
     private function createS3Key($filename)
     {

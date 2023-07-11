@@ -18,7 +18,7 @@ class Shape extends AbstractModel
      */
     public static function create(array $definition, ShapeMap $shapeMap)
     {
-        static $map = ['structure' => 'ExpressionEngine\\Dependency\\Aws\\Api\\StructureShape', 'map' => 'ExpressionEngine\\Dependency\\Aws\\Api\\MapShape', 'list' => 'ExpressionEngine\\Dependency\\Aws\\Api\\ListShape', 'timestamp' => 'ExpressionEngine\\Dependency\\Aws\\Api\\TimestampShape', 'integer' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'double' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'float' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'long' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'string' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'byte' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'character' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'blob' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape', 'boolean' => 'ExpressionEngine\\Dependency\\Aws\\Api\\Shape'];
+        static $map = ['structure' => StructureShape::class, 'map' => MapShape::class, 'list' => ListShape::class, 'timestamp' => TimestampShape::class, 'integer' => Shape::class, 'double' => Shape::class, 'float' => Shape::class, 'long' => Shape::class, 'string' => Shape::class, 'byte' => Shape::class, 'character' => Shape::class, 'blob' => Shape::class, 'boolean' => Shape::class];
         if (isset($definition['shape'])) {
             return $shapeMap->resolve($definition);
         }
@@ -45,5 +45,12 @@ class Shape extends AbstractModel
     public function getName()
     {
         return $this->definition['name'];
+    }
+    /**
+     * Get a context param definition.
+     */
+    public function getContextParam()
+    {
+        return $this->contextParam;
     }
 }

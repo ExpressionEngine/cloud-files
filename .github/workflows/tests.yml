@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-    
+
     # eventually we may want to skip the build process and just take a distributable file
     # and copy over the tests/cypress folder from the EE source repo
     build-for-testing:
@@ -23,7 +23,7 @@ jobs:
           #     repository: ExpressionEngine/ExpressionEngine
           #     ref: '7.x'
           #     path: 'ee'
-          
+
           - name: Checkout ExpressionEngine
             uses: actions/checkout@v2
             with:
@@ -31,13 +31,13 @@ jobs:
               ref: '7.dev'
               path: 'ee'
               token: ${{ secrets.ORG_ACCESS_TOKEN }}
-          
+
           - name: Cache repository info
             uses: actions/cache@v2
             with:
               path: ee/.git
               key: cache-ee-git-${{ github.sha }}
-  
+
           - name: Setup PHP
             uses: shivammathur/setup-php@v2
             with:
@@ -62,7 +62,7 @@ jobs:
               content=`node -pe 'JSON.parse(process.argv[1]).tag' "$(cat build.json)"`
               echo "::set-output name=BUILD_VERSION::$content"
 
-          - name: Run build process 
+          - name: Run build process
             working-directory: ee/build-tools
             env:
               RELEASE_KEY: ${{ secrets.RELEASE_KEY }}
@@ -78,10 +78,10 @@ jobs:
           - name: Copy Addon files
             run: |
               cp -R cloud_files ee/build-tools/builds/ExpressionEngine/system/user/addons/
-          
+
           - name: Copy Addon test files
             run: cp -R cloud_files/tests/cypress/cypress/integration/. ee/build-tools/builds/ExpressionEngine/tests/cypress/cypress/integration/
-          
+
           - name: Directory Listing
             run: |
               ls -la ee/build-tools/builds/ExpressionEngine/system/user/addons
@@ -92,7 +92,7 @@ jobs:
             with:
               path: ee/build-tools/builds/ExpressionEngine
               key: cache-ee-build-${{ github.sha }}
-          
+
           - name: Directory Listing on Failure
             if: failure()
             run: |
@@ -106,7 +106,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.2, 7.4, 8.0, 8.1]
+                php: [7.4, 8.0, 8.1, 8.2]
                 os: [ubuntu-latest]
 
         name: Cypress Tests, PHP${{ matrix.php }} - ${{ matrix.os }}
@@ -122,7 +122,7 @@ jobs:
               run: |
                 ls -lar ee/build-tools/builds/ExpressionEngine/
                 cp -R ee/build-tools/builds/ExpressionEngine/. ./
-            
+
             - name: Restore cached git history
               uses: actions/cache@v2
               with:
@@ -182,11 +182,6 @@ jobs:
             - name: Start PHP Server
               run: php tests/serve.php &
 
-            # - name: Start SMTP Server
-            #   run: |
-            #     npm install -g maildev
-            #     maildev &
-
             - name: Run Cypress Tests
               uses: cypress-io/github-action@v2
               with:
@@ -205,17 +200,18 @@ jobs:
                 CYPRESS_DO_SPACES_REGION: ${{secrets.DO_SPACES_REGION}}
                 CYPRESS_DO_SPACES_SPACE: ${{secrets.DO_SPACES_SPACE}}
                 CYPRESS_CF_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
+                CYPRESS_KEEP_DEBUG: ${{env.KEEP_DEBUG !== 'false'}}
 
             - name: Archive screenshots
               uses: actions/upload-artifact@v2
-              if: failure()
+              if: env.KEEP_DEBUG !== 'false' && failure()
               with:
                 name: cypress-tests-PHP${{ matrix.php }}
                 path: tests/cypress/cypress/screenshots/
 
             - name: Archive server errors
               uses: actions/upload-artifact@v2
-              if: failure()
+              if: env.KEEP_DEBUG !== 'false' && failure()
               with:
                 name: error.PHP${{ matrix.php }}.log
                 path: /home/runner/php_errors.log

@@ -6,6 +6,7 @@ import FileManager from '../../elements/pages/files/FileManager';
 const page = new UploadEdit;
 const upload = new UploadFile;
 const filemanager = new FileManager;
+const keepDebug = Cypress.env('KEEP_DEBUG', false);
 
 const s3_settings = {
     key: Cypress.env('AWS_S3_KEY'),
@@ -39,7 +40,7 @@ context('AWS S3 Adapter Test', () => {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(s3_settings.key)
+            cy.wrap(el).clear().type(s3_settings.key, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -50,7 +51,7 @@ context('AWS S3 Adapter Test', () => {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(s3_settings.secret)
+            cy.wrap(el).clear().type(s3_settings.secret, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -71,7 +72,7 @@ context('AWS S3 Adapter Test', () => {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(s3_settings.bucket)
+            cy.wrap(el).clear().type(s3_settings.bucket, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -79,7 +80,7 @@ context('AWS S3 Adapter Test', () => {
 
         // Path
         cy.get('input[name="_for_adapter[awss3][server_path]"]').then(function(el) {
-            cy.wrap(el).clear().type(s3_settings.folder)
+            cy.wrap(el).clear().type(s3_settings.folder, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))

@@ -6,6 +6,7 @@ import FileManager from '../../elements/pages/files/FileManager';
 const page = new UploadEdit;
 const upload = new UploadFile;
 const filemanager = new FileManager;
+const keepDebug = Cypress.env('KEEP_DEBUG', false);
 
 const spaces_settings = {
     key: Cypress.env('DO_SPACES_KEY'),
@@ -39,7 +40,7 @@ context('DO Spaces Adapter Test', () => {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(spaces_settings.key)
+            cy.wrap(el).clear().type(spaces_settings.key, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -50,7 +51,7 @@ context('DO Spaces Adapter Test', () => {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(spaces_settings.secret)
+            cy.wrap(el).clear().type(spaces_settings.secret, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -71,7 +72,7 @@ context('DO Spaces Adapter Test', () => {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(spaces_settings.space)
+            cy.wrap(el).clear().type(spaces_settings.space, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -79,7 +80,7 @@ context('DO Spaces Adapter Test', () => {
 
         // Path
         cy.get('input[name="_for_adapter[digitalocean][server_path]"]').then(function(el) {
-            cy.wrap(el).clear().type(spaces_settings.folder)
+            cy.wrap(el).clear().type(spaces_settings.folder, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))

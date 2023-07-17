@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Cloud Files
 
 ## Requirements
@@ -21,13 +25,11 @@ This package provides filesystem adapters for the following services.
 ### Amazon S3
 
 Amazon Simple Storage Service ([Amazon S3](https://aws.amazon.com/s3/)) is an object storage service offering industry-leading scalability, data availability, security, and performance.
-This adapter allows you to store files inside your  account.
 
 Continue reading [here for steps on getting setup with Amazon S3](./adapter-aws-s3.md)
 
 ### DigitalOcean Spaces
 
 [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces) is an S3-compatible object storage with a built-in CDN that makes data storage and delivery easy, reliable, and affordable.
-This adapter allows you to store files inside your.
 
 Continue reading [here for steps on getting setup with DigitalOcean Spaces](./adapter-do-spaces.md)

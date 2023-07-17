@@ -44,7 +44,12 @@
             "Resource": [
                 "arn:aws:s3:::your-bucket-name",
                 "arn:aws:s3:::your-bucket-name/*"
-            ]
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
         }
     ]
 }

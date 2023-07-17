@@ -1,9 +1,21 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch for release'
+        required: true
+        default: 'main'
+      releaseType:
+        description: 'Type of release'
+        type: choice
+        required: true
+        default: 'patch'
+        options:
+        - major
+        - patch
+        - minor
 
 jobs:
     release:
@@ -12,20 +24,51 @@ jobs:
         runs-on: ubuntu-latest
         steps:
           - name: Checkout code
-            uses: actions/checkout@v2
+            uses: actions/checkout@v3
             with:
+              ref: ${{ github.event.inputs.branch }}
               path: 'cloud_files'
+              fetch-depth: 0
 
-          - uses: olegtarasov/get-tag@v2.1
-            id: tagName
+          - name: Update changelog
+            id: update_changelog
+            uses: release-flow/keep-a-changelog-action@v2
+            with:
+              changelog: cloud_files/CHANGELOG.md
+              command: bump
+              version: ${{ github.event.inputs.releaseType }}
+              tag-prefix: ''
+              keep-unreleased-section: true
+
+          - name: Display version number
+            run: |
+              echo "New release version: ${{ steps.update_changelog.outputs.version }}"
 
           - name: Update version
             uses: jacobtomlinson/gha-find-replace@v2
             with:
               find: '\d+.\d+.\d+'
-              replace: ${{ steps.tagName.outputs.tag }}
+              replace: ${{ steps.update_changelog.outputs.version }}
               include: "cloud_files/addon.setup.php"
               regex: true
+
+          - name: Commit changes
+            uses: stefanzweifel/git-auto-commit-action@v4
+            with:
+              repository: cloud_files
+              branch: ${{ github.event.inputs.branch }}
+              commit_message: Prepare Release ${{ steps.update_changelog.outputs.version }}
+
+          - name: Create the tag
+            working-directory: cloud_files
+            run: git tag ${{ steps.update_changelog.outputs.version }}
+
+          - name: Simplify Packaged Docs
+            working-directory: cloud_files
+            run: |
+              mv docs docs-build
+              mv docs-build/docs docs
+              rm -rf docs-build
 
           - name: Remove development files
             working-directory: cloud_files
@@ -38,15 +81,17 @@ jobs:
             with:
               name: cloud_files
               path: cloud_files
-          
+
           - name: Compress Add-on
             run: zip -r cloud_files.zip cloud_files/
 
-          - uses: ncipollo/release-action@v1.10.0
+          - name: Create the release
+            uses: ncipollo/release-action@v1
             with:
+              tag: ${{ steps.update_changelog.outputs.version }}
+              body: ${{ steps.update_changelog.outputs.release-notes }}
               artifacts: "cloud_files.zip"
               allowUpdates: true
-              body: Cloud Files ${{ steps.tagName.outputs.tag }}
 
           - name: Directory Listing on Failure
             if: failure()

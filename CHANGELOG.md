@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Filesystem Adapter for integrating with Cloudflare R2 service
+
 ### Fixed
 
 - Update dependencies for PHP 8.2 Support

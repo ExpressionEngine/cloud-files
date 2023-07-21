@@ -205,6 +205,11 @@ jobs:
                 CYPRESS_DO_SPACES_SECRET: ${{secrets.DO_SPACES_SECRET}}
                 CYPRESS_DO_SPACES_REGION: ${{secrets.DO_SPACES_REGION}}
                 CYPRESS_DO_SPACES_SPACE: ${{secrets.DO_SPACES_SPACE}}
+                CYPRESS_CF_R2_ACCOUNT_ID: ${{secrets.CF_R2_ACCOUNT_ID}}
+                CYPRESS_CF_R2_KEY: ${{secrets.CF_R2_KEY}}
+                CYPRESS_CF_R2_SECRET: ${{secrets.CF_R2_SECRET}}
+                CYPRESS_CF_R2_BUCKET: ${{secrets.CF_R2_BUCKET}}
+                CYPRESS_CF_R2_URL: ${{secrets.CF_R2_URL}}
                 CYPRESS_CF_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
 <<<<<<< HEAD
                 CYPRESS_KEEP_DEBUG: ${{env.KEEP_DEBUG !== 'false'}}

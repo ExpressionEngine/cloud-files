@@ -5,6 +5,7 @@
 ### Added
 
 - Filesystem Adapter for integrating with Cloudflare R2 service
+- Support for eager loading a set of paths using parallel requests to improve performance
 
 ### Fixed
 

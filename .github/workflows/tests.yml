@@ -13,33 +13,19 @@ jobs:
         runs-on: ubuntu-latest
         steps:
           - name: Checkout code
-            uses: actions/checkout@v2
+            uses: actions/checkout@v3
             with:
               path: 'cloud_files'
 
-<<<<<<< HEAD
-          # - name: Checkout ExpressionEngine
-          #   uses: actions/checkout@v2
-          #   with:
-          #     repository: ExpressionEngine/ExpressionEngine
-          #     ref: '7.x'
-          #     path: 'ee'
-
-=======
->>>>>>> f70e53d (Allow tests to toggle storing artifacts)
           - name: Checkout ExpressionEngine
-            uses: actions/checkout@v2
+            uses: actions/checkout@v3
             with:
               repository: ExpressionEngine/ExpressionEngine
               ref: '7.x'
               path: 'ee'
-<<<<<<< HEAD
-              token: ${{ secrets.ORG_ACCESS_TOKEN }}
-=======
->>>>>>> f70e53d (Allow tests to toggle storing artifacts)
 
           - name: Cache repository info
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ee/.git
               key: cache-ee-git-${{ github.sha }}
@@ -66,7 +52,7 @@ jobs:
             working-directory: ee/build-tools
             run: |
               content=`node -pe 'JSON.parse(process.argv[1]).tag' "$(cat build.json)"`
-              echo "BUILD_VERSION=$content" >> $GITHUB_OUTPUT
+              echo "::set-output name=BUILD_VERSION::$content"
 
           - name: Run build process
             working-directory: ee/build-tools
@@ -94,7 +80,7 @@ jobs:
               ls -la ee/build-tools/builds/ExpressionEngine/tests/cypress/cypress/integration
 
           - name: Cache built EE version
-            uses: actions/cache@v2
+            uses: actions/cache@v3
             with:
               path: ee/build-tools/builds/ExpressionEngine
               key: cache-ee-build-${{ github.sha }}
@@ -119,7 +105,7 @@ jobs:
         steps:
 
             - name: Use cached EE build
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                 path: ee/build-tools/builds/ExpressionEngine
                 key: cache-ee-build-${{ github.sha }}
@@ -130,7 +116,7 @@ jobs:
                 cp -R ee/build-tools/builds/ExpressionEngine/. ./
 
             - name: Restore cached git history
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                 path: ee/.git
                 key: cache-ee-git-${{ github.sha }}
@@ -189,7 +175,7 @@ jobs:
               run: php tests/serve.php &
 
             - name: Run Cypress Tests
-              uses: cypress-io/github-action@v2
+              uses: cypress-io/github-action@v3
               with:
                 spec: cypress/integration/addon_cloud_files/**
                 browser: chrome
@@ -211,30 +197,18 @@ jobs:
                 CYPRESS_CF_R2_BUCKET: ${{secrets.CF_R2_BUCKET}}
                 CYPRESS_CF_R2_URL: ${{secrets.CF_R2_URL}}
                 CYPRESS_CF_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
-<<<<<<< HEAD
-                CYPRESS_KEEP_DEBUG: ${{env.KEEP_DEBUG !== 'false'}}
-
-            - name: Archive screenshots
-              uses: actions/upload-artifact@v2
-              if: env.KEEP_DEBUG !== 'false' && failure()
-=======
                 CYPRESS_KEEP_DEBUG: ${{vars.KEEP_DEBUG != 'false'}}
 
             - name: Archive screenshots
               uses: actions/upload-artifact@v2
               if: vars.KEEP_DEBUG != 'false' && failure()
->>>>>>> f70e53d (Allow tests to toggle storing artifacts)
               with:
                 name: cypress-tests-PHP${{ matrix.php }}
                 path: tests/cypress/cypress/screenshots/
 
             - name: Archive server errors
               uses: actions/upload-artifact@v2
-<<<<<<< HEAD
-              if: env.KEEP_DEBUG !== 'false' && failure()
-=======
               if: vars.KEEP_DEBUG != 'false' && failure()
->>>>>>> f70e53d (Allow tests to toggle storing artifacts)
               with:
                 name: error.PHP${{ matrix.php }}.log
                 path: /home/runner/php_errors.log

@@ -8,13 +8,13 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Cloud Files',
   tagline: 'ExpressionEngine & Cloud File Storage',
-//   favicon: 'img/favicon.ico',
+  //favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://expressionengine.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/ee-cloud-files/',
+  baseUrl: '/cloud-files/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -76,12 +76,21 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'ExpressionEngine',
+            title: 'Community',
             items: [
               {
                 label: 'Stack Exchange',
                 href: 'https://expressionengine.stackexchange.com/',
               },
+              {
+                label: 'GitHub',
+                href: 'https://github.com/expressionengine/cloud-files',
+              },
+            ],
+          },
+          {
+            // title: 'More',
+            items: [
               {
                 label: 'Slack',
                 href: 'https://expressionengine.com/blog/join-us-in-slack',
@@ -89,15 +98,6 @@ const config = {
               {
                 label: 'Twitter',
                 href: 'https://twitter.com/eecms',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/expressionengine/cloud-files',
               },
             ],
           },

@@ -9,6 +9,8 @@ sidebar_position: 1
 This add-on requires ExpressionEngine version 7.0.0 or later.
 The requirements for this version are [listed here](https://docs.expressionengine.com/v7/installation/requirements.html#recommended-requirements).
 
+Also please note that Cloud Files adapters will not work with file manager [Compatibility Mode](https://docs.expressionengine.com/latest/control-panel/file-manager/file-manager.html#compatibility-mode) turned on.
+
 ## Changelog
 
 The changelog provides an account of what changes were made in each version of the Add-on as well as a look at what may be coming in a future release.  You can [view the changelog here on Github](https://github.com/ExpressionEngine/cloud-files/blob/main/CHANGELOG.md).

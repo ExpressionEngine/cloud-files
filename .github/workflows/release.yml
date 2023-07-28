@@ -75,6 +75,8 @@ jobs:
             run: |
               rm -rf tests
               rm -rf .github
+              rm -rf .git
+              rm -f .gitignore
 
           - name: Archive Add-on
             uses: actions/upload-artifact@v2

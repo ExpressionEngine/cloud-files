@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2023-07-28
+
 ### Added
 
 - Filesystem Adapter for integrating with Cloudflare R2 service
@@ -29,11 +31,12 @@
 
 - ExpressionEngine Filesystem adapters for AWS S3 and DigitalOcean Spaces
 
+[Unreleased]: https://github.com/ExpressionEngine/cloud-files/compare/1.1.0...HEAD
 
-[Unreleased]: https://github.com/packettide/ee-cloud-files/compare/1.0.2...HEAD
+[1.1.0]: https://github.com/ExpressionEngine/cloud-files/compare/1.0.2...1.1.0
 
-[1.0.2]: https://github.com/packettide/ee-cloud-files/compare/1.0.1...1.0.2
+[1.0.2]: https://github.com/ExpressionEngine/cloud-files/compare/1.0.1...1.0.2
 
-[1.0.1]: https://github.com/packettide/ee-cloud-files/compare/1.0.0...1.0.1
+[1.0.1]: https://github.com/ExpressionEngine/cloud-files/compare/1.0.0...1.0.1
 
-[1.0.0]: https://github.com/packettide/ee-cloud-files/releases/tag/1.0.0
+[1.0.0]: https://github.com/ExpressionEngine/cloud-files/releases/tag/1.0.0

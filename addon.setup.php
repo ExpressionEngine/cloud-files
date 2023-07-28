@@ -7,7 +7,7 @@ return array(
     'author_url' => 'https://expressionengine.com/',
     'name' => 'Cloud Files',
     'description' => '',
-    'version' => '1.0.0',
+    'version' => '1.1.0',
     'namespace' => 'CloudFiles',
     'settings_exist' => false,
     'filesystem_adapters' => [

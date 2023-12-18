@@ -7,6 +7,8 @@
 ![Navigate to S3](./images/adapter-aws-step1-start.png "Navigate to S3")
 1. Click on "Create Bucket" button and populate the form with your desired settings. Make a note of the bucket `name` and `region` because you will need these later when configuring ExpressionEngine
 ![Create a new Bucket](./images/adapter-aws-step1-create.png "Create a new Bucket")
+1. Enable ACL - Go to the Bucket > Permissions Tab then scroll down to "Object Ownership" and click on Edit. Click "ACL Enabled" and choose Object Ownership - Bucket Owner preferred
+![Enable Bucket ACL](./images/adapter-aws-step1-acl.png "Enable Bucket ACL")
 
 ## Step 2: Create an IAM User with Full S3 Access
 
@@ -25,7 +27,7 @@
 
 ## Step 2a: Create an IAM User with Restricted Access
 1. Follow items 1-4 from Step 2 above
-2. Click "Create Policy".  This should open a new window, do not close the old one, we will come back to that. Select the "JSON" tab and paste in the following content.  Make sure you substitue `your-bucket-name` with the name of your bucket created in Step 1.
+2. Click "Create Policy".  This should open a new window, do not close the old one, we will come back to that. Select the "JSON" tab and paste in the following content.  Make sure you substitute `your-bucket-name` with the name of your bucket created in Step 1.
 ```
 {
     "Version": "2012-10-17",
@@ -71,7 +73,7 @@
 5. Choose the correct *Region* for this bucket selected during Step 1.3
 6. Enter the **Bucket Name** which was chosen during Step 1.3
 7. Optionally you can specify a **Path** inside your bucket where the directory should store files and folders.
-8. Optionally you can specify a **Url** to use as the base when generating links to files in the bucket.  This can be useful for having a CDN handle requests to your files.
+8. Optionally you can specify a **Url** to use as the base when generating links to files in the bucket.  This can be useful for having a CDN handle requests to your files.  (Cloud Files will auto-generate a "path-style" url from your bucket configuration but if you need or prefer a "virtual-hosted style" url you can enter that instead)
 9. Continue to configure the directory how you normally would and click "Save".
 
 ![Create Upload Directory](./images/adapter-aws-step3-configure-ee.png "Create Upload Directory")

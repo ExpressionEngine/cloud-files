@@ -72,7 +72,7 @@
 4. Enter the "Secret access key" from Step 2.8 into the **Secret** field
 5. Choose the correct *Region* for this bucket selected during Step 1.3
 6. Enter the **Bucket Name** which was chosen during Step 1.3
-7. Optionally you can specify a **Path** inside your bucket where the directory should store files and folders.
+7. Optionally you can specify a **Path** inside your bucket where the directory should store files and folders.  Please note this path is only used for file storage and manipulation, you may need to add this path to your **Url** as well depending on your configuration.
 8. Optionally you can specify a **Url** to use as the base when generating links to files in the bucket.  This can be useful for having a CDN handle requests to your files.  (Cloud Files will auto-generate a "path-style" url from your bucket configuration but if you need or prefer a "virtual-hosted style" url you can enter that instead)
 9. Continue to configure the directory how you normally would and click "Save".
 

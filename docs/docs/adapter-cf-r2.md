@@ -28,7 +28,7 @@
 4. Enter the "Token Key" from Step 2.4 into the **Key** field
 5. Enter the "Token Secret" from Step 2.4 into the **Secret** field
 6. Enter the **Bucket Name** which was chosen during Step 1.3
-7. Optionally you can specify a **Path** inside your bucket where the directory should store files and folders.
+7. Optionally you can specify a **Path** inside your bucket where the directory should store files and folders. Please note this path is only used for file storage and manipulation, you may need to add this path to your **Url** as well depending on your configuration.
 8. Specify a **Url** to use as the base when generating links to files in the bucket.  This is a required field because it is the only way to setup public access to files within your bucket.  You can either use a custom domain or the `r2.dev` service for development and testing.  You can learn more about these options in the [Cloudflare R2 Public Buckets documentation](https://developers.cloudflare.com/r2/buckets/public-buckets/).
 9. Continue to configure the directory how you normally would and click "Save".
 

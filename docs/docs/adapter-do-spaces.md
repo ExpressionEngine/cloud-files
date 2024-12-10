@@ -24,7 +24,7 @@
 4. Enter the "Secret" from Step 2.5 into the **Secret** field
 5. Choose the correct *Region* for this space selected during Step 1.3
 6. Enter the **Space Name** which was chosen during Step 1.3
-7. Optionally you can specify a **Path** inside your space where the directory should store files and folders.
+7. Optionally you can specify a **Path** inside your space where the directory should store files and folders. Please note this path is only used for file storage and manipulation, you may need to add this path to your **Url** as well depending on your configuration.
 8. Optionally you can specify a **Url** to use as the base when generating links to files in the space.  This can be useful for having a CDN handle requests to your files.
 9. Continue to configure the directory how you normally would and click "Save".
 

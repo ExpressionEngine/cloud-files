@@ -12,7 +12,8 @@ return array(
     'settings_exist' => false,
     'filesystem_adapters' => [
         \CloudFiles\Adapter\AwsS3::class,
-        \CloudFiles\Adapter\DigitalOcean::class,
+        \CloudFiles\Adapter\BackblazeB2::class,
         \CloudFiles\Adapter\CloudflareR2::class,
+        \CloudFiles\Adapter\DigitalOcean::class,
     ]
 );

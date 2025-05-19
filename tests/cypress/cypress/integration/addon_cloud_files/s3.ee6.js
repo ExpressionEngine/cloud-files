@@ -101,7 +101,7 @@ context('AWS S3 Adapter Test', () => {
         page.load()
         cy.get('.secondary-sidebar').contains('S3 Test').click()
 
-        let md_file = '../../support/file/README.md'
+        let md_file = 'support/file/README.md'
         upload.dragAndDropUpload(md_file)
         cy.get('.file-upload-widget').should('not.be.visible')
         cy.wait('@table')

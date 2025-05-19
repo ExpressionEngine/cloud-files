@@ -8,89 +8,81 @@ const upload = new UploadFile;
 const filemanager = new FileManager;
 const keepDebug = Cypress.env('KEEP_DEBUG', false);
 
-const r2_settings = {
-    account_id: Cypress.env('CF_R2_ACCOUNT_ID'),
-    key: Cypress.env('CF_R2_KEY'),
-    secret: Cypress.env('CF_R2_SECRET'),
-    bucket: Cypress.env('CF_R2_BUCKET'),
-    url: Cypress.env('CF_R2_URL') + '/' + Cypress.env('CF_TEST_FOLDER') + '/',
+const b2_settings = {
+    key: Cypress.env('BB_B2_KEY'),
+    secret: Cypress.env('BB_B2_SECRET'),
+    region: Cypress.env('BB_B2_REGION'),
+    bucket: Cypress.env('BB_B2_BUCKET'),
     folder: Cypress.env('CF_TEST_FOLDER') +'/',
 }
 
-context('Cloudflare R2 Adapter Test', () => {
+context('Backblaze B2 Adapter Test', () => {
 
     before(function() {
         cy.task('db:seed')
     })
 
-    it('can create an upload destination with R2 adapter', function() {
+    it('can create an upload destination with B2 adapter', function() {
         cy.auth()
         page.load()
         cy.intercept("**/files/uploads/**").as("ajax");
-        page.get('name').clear().type('R2 Test')
+        page.get('name').clear().type('B2 Test')
 
         // Allow all file types
         page.get('allowed_types').find('[value="--"]').check()
 
         cy.get('[data-input-value=adapter] .select__button').click()
-        cy.get('[data-input-value=adapter] .select__dropdown .select__dropdown-item').contains('Cloudflare R2').click()
+        cy.get('[data-input-value=adapter] .select__dropdown .select__dropdown-item').contains('Backblaze B2').click()
 
-        // R2 settings
-        // Account ID
-        cy.get('input[name="_for_adapter[cloudflarer2][adapter_settings][account_id]"]').then(function (el) {
-            el.trigger('blur')
-            cy.wait("@ajax")
-            page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(r2_settings.account_id, { log: keepDebug })
-            el.trigger('blur')
-            cy.wait("@ajax")
-            page.hasNoError(cy.wrap(el))
-        })
+        // B2 settings
 
         // Key
-        cy.get('input[name="_for_adapter[cloudflarer2][adapter_settings][key]"]').then(function(el) {
+        cy.get('input[name="_for_adapter[backblazeb2][adapter_settings][key]"]').then(function(el) {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(r2_settings.key, {log: keepDebug})
+            cy.wrap(el).clear().type(b2_settings.key, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
         })
 
         // Secret
-        cy.get('input[name="_for_adapter[cloudflarer2][adapter_settings][secret]"]').then(function(el) {
+        cy.get('input[name="_for_adapter[backblazeb2][adapter_settings][secret]"]').then(function(el) {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(r2_settings.secret, {log: keepDebug})
+            cy.wrap(el).clear().type(b2_settings.secret, {log: keepDebug})
+            el.trigger('blur')
+            cy.wait("@ajax")
+            page.hasNoError(cy.wrap(el))
+        })
+
+        // Region
+        cy.get('input[name="_for_adapter[backblazeb2][adapter_settings][region]"]').then(function(el) {
+            el.trigger('blur')
+            cy.wait("@ajax")
+            page.hasError(cy.wrap(el), page.messages.validation.required)
+            cy.wrap(el).clear().type(b2_settings.region, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
         })
 
         // Bucket
-        cy.get('input[name="_for_adapter[cloudflarer2][adapter_settings][bucket]"]').then(function(el) {
+        cy.get('input[name="_for_adapter[backblazeb2][adapter_settings][bucket]"]').then(function(el) {
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasError(cy.wrap(el), page.messages.validation.required)
-            cy.wrap(el).clear().type(r2_settings.bucket, {log: keepDebug})
+            cy.wrap(el).clear().type(b2_settings.bucket, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
         })
 
         // Path
-        cy.get('input[name="_for_adapter[cloudflarer2][server_path]"]').then(function(el) {
-            cy.wrap(el).clear().type(r2_settings.folder, {log: keepDebug})
-            el.trigger('blur')
-            cy.wait("@ajax")
-            page.hasNoError(cy.wrap(el))
-        })
-
-        // URL
-        cy.get('input[name="_for_adapter[cloudflarer2][url]"]').then(function (el) {
-            cy.wrap(el).clear().type(r2_settings.url, { log: keepDebug })
+        cy.get('input[name="_for_adapter[backblazeb2][server_path]"]').then(function(el) {
+            cy.wrap(el).clear().type(b2_settings.folder, {log: keepDebug})
             el.trigger('blur')
             cy.wait("@ajax")
             page.hasNoError(cy.wrap(el))
@@ -98,10 +90,10 @@ context('Cloudflare R2 Adapter Test', () => {
 
         page.submit()
 
-        // See R2 in Files sidebar
-        cy.get('.secondary-sidebar').contains('R2 Test').click()
+        // See B2 in Files sidebar
+        cy.get('.secondary-sidebar').contains('B2 Test').click()
 
-        // View R2 destination, see error
+        // View B2 destination, see error
         cy.should('not.contain', 'Cannot find the directory')
 
     })
@@ -109,7 +101,7 @@ context('Cloudflare R2 Adapter Test', () => {
     it('Can upload a file', function() {
         cy.auth()
         page.load()
-        cy.get('.secondary-sidebar').contains('R2 Test').click()
+        cy.get('.secondary-sidebar').contains('B2 Test').click()
 
         let md_file = 'support/file/README.md'
         upload.dragAndDropUpload(md_file)
@@ -126,7 +118,7 @@ context('Cloudflare R2 Adapter Test', () => {
     it('Can delete a file', function() {
         cy.auth()
         page.load()
-        cy.get('.secondary-sidebar').contains('R2 Test').click()
+        cy.get('.secondary-sidebar').contains('B2 Test').click()
 
 
         let filename = '';

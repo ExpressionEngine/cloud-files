@@ -101,7 +101,7 @@ context('DO Spaces Adapter Test', () => {
         page.load()
         cy.get('.secondary-sidebar').contains('Spaces Test').click()
 
-        let md_file = '../../support/file/README.md'
+        let md_file = 'support/file/README.md'
         upload.dragAndDropUpload(md_file)
         cy.get('.file-upload-widget').should('not.be.visible')
         cy.wait('@table')

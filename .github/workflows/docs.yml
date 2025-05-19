@@ -2,6 +2,8 @@ name: Documentation
 
 on:
   push:
+    branches:
+      - main
     paths:
       - docs/**
 
@@ -35,11 +37,11 @@ jobs:
           npm install
           npm run build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: 'docs/build'
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v5
   deploy:
     environment:
       name: github-pages
@@ -49,4 +51,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4

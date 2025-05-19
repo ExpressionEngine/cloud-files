@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Filesystem Adapter for integrating with Backblaze B2 service
+
 ## [1.1.0] - 2023-07-28
 
 ### Added

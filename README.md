@@ -1,6 +1,6 @@
 # Cloud Files
 
-For installation and usage please [read the documentation](docs/index.md)
+For installation and usage please [read the documentation](docs/docs/index.md)
 
 ## Contributing
 

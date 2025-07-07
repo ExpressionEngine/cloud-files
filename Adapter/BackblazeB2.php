@@ -27,7 +27,7 @@ class BackblazeB2 extends Flysystem\AwsS3v3\AwsS3Adapter implements AdapterInter
                 'key'    => $settings['key'],
                 'secret' => $settings['secret']
             ],
-            'region' => $settings['region'],
+            'region' => $settings['region'] ?: 'east-001',
             'version' => 'latest',
             'endpoint' => "https://s3.{$settings['region']}.backblazeb2.com",
             'exception_class' => \ExpressionEngine\Dependency\Aws\S3\Exception\S3Exception::class

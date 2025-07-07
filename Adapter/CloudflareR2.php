@@ -3,6 +3,7 @@
 namespace CloudFiles\Adapter;
 
 use ExpressionEngine\Dependency\Aws\S3\S3Client;
+use ExpressionEngine\Dependency\Aws\S3\Exception\S3Exception;
 use ExpressionEngine\Dependency\League\Flysystem;
 use ExpressionEngine\Library\Filesystem\Adapter\AdapterInterface;
 use ExpressionEngine\Library\Filesystem\Adapter\AdapterTrait;
@@ -117,5 +118,23 @@ class CloudflareR2 extends AbstractS3 implements AdapterInterface, ValidationAwa
             $this->getBucket(),
             $this->getPathPrefix()
         ]));
+    }
+
+    /**
+     * Copy a file.
+     *
+     * @param string $path
+     * @param string $newpath
+     *
+     * @return bool
+     */
+    public function copy($path, $newpath)
+    {
+        try {
+            $this->s3Client->copy($this->bucket, $this->applyPathPrefix($path), $this->bucket, $this->applyPathPrefix($newpath), 'private', $this->options);
+        } catch (S3Exception $e) {
+            return \false;
+        }
+        return \true;
     }
 }

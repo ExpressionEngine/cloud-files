@@ -6,6 +6,10 @@
 
 - Filesystem Adapter for integrating with Backblaze B2 service
 
+### Fixed
+
+- An issue with Cloudflare R2 where moving a file into a different subfolder would fail
+
 ## [1.1.0] - 2023-07-28
 
 ### Added

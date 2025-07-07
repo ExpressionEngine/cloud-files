@@ -20,7 +20,7 @@ class GuzzleHandler
     /**
      * @param ClientInterface $client
      */
-    public function __construct(ClientInterface $client = null)
+    public function __construct(?ClientInterface $client = null)
     {
         $this->client = $client ?: new Client();
     }
@@ -47,8 +47,8 @@ class GuzzleHandler
             $fn = $options['http_stats_receiver'];
             unset($options['http_stats_receiver']);
             $prev = isset($options['on_stats']) ? $options['on_stats'] : null;
-            $options['on_stats'] = static function (TransferStats $stats) use($fn, $prev) {
-                if (\is_callable($prev)) {
+            $options['on_stats'] = static function (TransferStats $stats) use ($fn, $prev) {
+                if (is_callable($prev)) {
                     $prev($stats);
                 }
                 $transferStats = ['total_time' => $stats->getTransferTime()];

@@ -33,7 +33,7 @@ class JsonBody
         if (empty($jsonVersion)) {
             throw new \InvalidArgumentException('invalid json');
         } else {
-            return 'application/x-amz-json-' . @\number_format($service->getMetadata('jsonVersion'), 1);
+            return 'application/x-amz-json-' . @number_format($service->getMetadata('jsonVersion'), 1);
         }
     }
     /**
@@ -46,7 +46,7 @@ class JsonBody
      */
     public function build(Shape $shape, array $args)
     {
-        $result = \json_encode($this->format($shape, $args));
+        $result = json_encode($this->format($shape, $args));
         return $result == '[]' ? '{}' : $result;
     }
     private function format(Shape $shape, $value)
@@ -83,7 +83,7 @@ class JsonBody
                 }
                 return $value;
             case 'blob':
-                return \base64_encode($value);
+                return base64_encode($value);
             case 'timestamp':
                 $timestampFormat = !empty($shape['timestampFormat']) ? $shape['timestampFormat'] : 'unixTimestamp';
                 return TimestampShape::format($value, $timestampFormat);

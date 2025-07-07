@@ -14,20 +14,20 @@ class ExtensionMimeTypeDetector implements MimeTypeDetector
     {
         $this->extensions = $extensions ?: new GeneratedExtensionToMimeTypeMap();
     }
-    public function detectMimeType(string $path, $contents) : ?string
+    public function detectMimeType(string $path, $contents): ?string
     {
         return $this->detectMimeTypeFromPath($path);
     }
-    public function detectMimeTypeFromPath(string $path) : ?string
+    public function detectMimeTypeFromPath(string $path): ?string
     {
-        $extension = \strtolower(\pathinfo($path, PATHINFO_EXTENSION));
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
         return $this->extensions->lookupMimeType($extension);
     }
-    public function detectMimeTypeFromFile(string $path) : ?string
+    public function detectMimeTypeFromFile(string $path): ?string
     {
         return $this->detectMimeTypeFromPath($path);
     }
-    public function detectMimeTypeFromBuffer(string $contents) : ?string
+    public function detectMimeTypeFromBuffer(string $contents): ?string
     {
         return null;
     }

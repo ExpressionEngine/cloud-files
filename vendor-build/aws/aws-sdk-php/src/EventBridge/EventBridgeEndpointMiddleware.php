@@ -25,7 +25,7 @@ class EventBridgeEndpointMiddleware
      */
     public static function wrap($region, $config, $endpointProvider, $isCustomEndpoint)
     {
-        return function (callable $handler) use($region, $config, $endpointProvider, $isCustomEndpoint) {
+        return function (callable $handler) use ($region, $config, $endpointProvider, $isCustomEndpoint) {
             return new self($handler, $region, $config, $endpointProvider, $isCustomEndpoint);
         };
     }
@@ -34,13 +34,13 @@ class EventBridgeEndpointMiddleware
         $this->nextHandler = $nextHandler;
         $this->region = $region;
         $this->config = $config;
-        $this->endpointProvider = \is_null($endpointProvider) ? PartitionEndpointProvider::defaultProvider() : $endpointProvider;
+        $this->endpointProvider = is_null($endpointProvider) ? PartitionEndpointProvider::defaultProvider() : $endpointProvider;
         $this->isCustomEndpoint = $isCustomEndpoint;
     }
     public function __invoke(CommandInterface $cmd, RequestInterface $req)
     {
         $sigV4aCommands = ['PutEvents'];
-        if (\in_array($cmd->getName(), $sigV4aCommands)) {
+        if (in_array($cmd->getName(), $sigV4aCommands)) {
             if (isset($cmd['EndpointId'])) {
                 $endpointID = $cmd['EndpointId'];
                 $this->validateEndpointId($endpointID);
@@ -58,10 +58,10 @@ class EventBridgeEndpointMiddleware
     }
     protected static function isValidHostLabel($string)
     {
-        if (empty($string) || \strlen($string) > 63) {
+        if (empty($string) || strlen($string) > 63) {
             return \false;
         }
-        if ($value = \preg_match("/^[a-zA-Z0-9-.]+\$/", $string)) {
+        if ($value = preg_match("/^[a-zA-Z0-9-.]+\$/", $string)) {
             return \true;
         }
         return \false;

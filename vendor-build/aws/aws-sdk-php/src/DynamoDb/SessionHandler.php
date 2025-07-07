@@ -82,7 +82,7 @@ class SessionHandler implements \SessionHandlerInterface
      */
     public function register()
     {
-        return \session_set_save_handler($this, \true);
+        return session_set_save_handler($this, \true);
     }
     /**
      * Open a session for writing. Triggered by session_start().
@@ -107,7 +107,7 @@ class SessionHandler implements \SessionHandlerInterface
     #[\ReturnTypeWillChange]
     public function close()
     {
-        $id = \session_id();
+        $id = session_id();
         // Make sure the session is unlocked and the expiration time is updated,
         // even if the write did not occur
         if ($this->openSessionId !== $id || !$this->sessionWritten) {
@@ -137,7 +137,7 @@ class SessionHandler implements \SessionHandlerInterface
         // Return the data if it is not expired. If it is expired, remove it
         if (isset($item[$sessionLifetimeAttribute]) && isset($item[$dataAttribute])) {
             $this->dataRead = $item[$dataAttribute];
-            if ($item[$sessionLifetimeAttribute] <= \time()) {
+            if ($item[$sessionLifetimeAttribute] <= time()) {
                 $this->dataRead = '';
                 $this->destroy($id);
             }
@@ -208,6 +208,6 @@ class SessionHandler implements \SessionHandlerInterface
      */
     private function formatId($id)
     {
-        return \trim($this->sessionName . '_' . $id, '_');
+        return trim($this->sessionName . '_' . $id, '_');
     }
 }

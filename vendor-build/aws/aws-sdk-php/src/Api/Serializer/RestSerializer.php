@@ -9,8 +9,8 @@ use ExpressionEngine\Dependency\Aws\Api\Shape;
 use ExpressionEngine\Dependency\Aws\Api\StructureShape;
 use ExpressionEngine\Dependency\Aws\Api\TimestampShape;
 use ExpressionEngine\Dependency\Aws\CommandInterface;
-use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointProviderV2;
 use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointV2SerializerTrait;
+use ExpressionEngine\Dependency\Aws\EndpointV2\Ruleset\RulesetEndpoint;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7\Request;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7\Uri;
@@ -38,20 +38,18 @@ abstract class RestSerializer
     }
     /**
      * @param CommandInterface $command Command to serialize into a request.
-     * @param $endpointProvider Provider used for dynamic endpoint resolution.
      * @param $clientArgs Client arguments used for dynamic endpoint resolution.
      *
      * @return RequestInterface
      */
-    public function __invoke(CommandInterface $command, $endpointProvider = null, $clientArgs = null)
+    public function __invoke(CommandInterface $command, $endpoint = null)
     {
         $operation = $this->api->getOperation($command->getName());
         $commandArgs = $command->toArray();
         $opts = $this->serialize($operation, $commandArgs);
         $headers = isset($opts['headers']) ? $opts['headers'] : [];
-        if ($endpointProvider instanceof EndpointProviderV2) {
-            $this->setRequestOptions($endpointProvider, $command, $operation, $commandArgs, $clientArgs, $headers);
-            $this->endpoint = new Uri($this->endpoint);
+        if ($endpoint instanceof RulesetEndpoint) {
+            $this->setEndpointV2RequestOptions($endpoint, $headers);
         }
         $uri = $this->buildEndpoint($operation, $commandArgs, $opts);
         return new Request($operation['http']['method'], $uri, $headers, isset($opts['body']) ? $opts['body'] : null);
@@ -63,7 +61,7 @@ abstract class RestSerializer
      * @param array            $value   Value to serialize
      * @param array            $opts    Request options to modify.
      */
-    protected abstract function payload(StructureShape $member, array $value, array &$opts);
+    abstract protected function payload(StructureShape $member, array $value, array &$opts);
     private function serialize(Operation $operation, array $args)
     {
         $opts = [];
@@ -89,10 +87,8 @@ abstract class RestSerializer
         }
         if (isset($bodyMembers)) {
             $this->payload($operation->getInput(), $bodyMembers, $opts);
-        } else {
-            if (!isset($opts['body']) && $this->hasPayloadParam($input, $payload)) {
-                $this->payload($operation->getInput(), [], $opts);
-            }
+        } else if (!isset($opts['body']) && $this->hasPayloadParam($input, $payload)) {
+            $this->payload($operation->getInput(), [], $opts);
         }
         return $opts;
     }
@@ -119,11 +115,11 @@ abstract class RestSerializer
             $value = $value ? 'true' : 'false';
         }
         if ($member['jsonvalue']) {
-            $value = \json_encode($value);
-            if (empty($value) && \JSON_ERROR_NONE !== \json_last_error()) {
-                throw new \InvalidArgumentException('Unable to encode the provided value' . ' with \'json_encode\'. ' . \json_last_error_msg());
+            $value = json_encode($value);
+            if (empty($value) && \JSON_ERROR_NONE !== json_last_error()) {
+                throw new \InvalidArgumentException('Unable to encode the provided value' . ' with \'json_encode\'. ' . json_last_error_msg());
             }
-            $value = \base64_encode($value);
+            $value = base64_encode($value);
         }
         $opts['headers'][$member['locationName'] ?: $name] = $value;
     }
@@ -140,7 +136,7 @@ abstract class RestSerializer
     private function applyQuery($name, Shape $member, $value, array &$opts)
     {
         if ($member instanceof MapShape) {
-            $opts['query'] = isset($opts['query']) && \is_array($opts['query']) ? $opts['query'] + $value : $value;
+            $opts['query'] = isset($opts['query']) && is_array($opts['query']) ? $opts['query'] + $value : $value;
         } elseif ($value !== null) {
             $type = $member->getType();
             if ($type === 'boolean') {
@@ -154,39 +150,48 @@ abstract class RestSerializer
     }
     private function buildEndpoint(Operation $operation, array $args, array $opts)
     {
+        $isModifiedModel = $this->api->isModifiedModel();
+        $serviceName = $this->api->getServiceName();
         // Create an associative array of variable definitions used in expansions
         $varDefinitions = $this->getVarDefinitions($operation, $args);
-        $relative = \preg_replace_callback('/\\{([^\\}]+)\\}/', function (array $matches) use($varDefinitions) {
-            $isGreedy = \substr($matches[1], -1, 1) == '+';
-            $k = $isGreedy ? \substr($matches[1], 0, -1) : $matches[1];
+        $relative = preg_replace_callback('/\{([^\}]+)\}/', function (array $matches) use ($varDefinitions) {
+            $isGreedy = substr($matches[1], -1, 1) == '+';
+            $k = $isGreedy ? substr($matches[1], 0, -1) : $matches[1];
             if (!isset($varDefinitions[$k])) {
                 return '';
             }
             if ($isGreedy) {
-                return \str_replace('%2F', '/', \rawurlencode($varDefinitions[$k]));
+                return str_replace('%2F', '/', rawurlencode($varDefinitions[$k]));
             }
-            return \rawurlencode($varDefinitions[$k]);
+            return rawurlencode($varDefinitions[$k]);
         }, $operation['http']['requestUri']);
         // Add the query string variables or appending to one if needed.
         if (!empty($opts['query'])) {
             $relative = $this->appendQuery($opts['query'], $relative);
         }
         $path = $this->endpoint->getPath();
-        //Accounts for trailing '/' in path when custom endpoint
-        //is provided to endpointProviderV2
-        if ($this->api->isModifiedModel() && $this->api->getServiceName() === 's3') {
-            if (\substr($path, -1) === '/' && $relative[0] === '/') {
-                $path = \rtrim($path, '/');
+        if ($isModifiedModel && $serviceName === 's3') {
+            if (substr($path, -1) === '/' && $relative[0] === '/') {
+                $path = rtrim($path, '/');
             }
             $relative = $path . $relative;
+            if (strpos($relative, '../') !== \false || substr($relative, -2) === '..') {
+                if ($relative[0] !== '/') {
+                    $relative = '/' . $relative;
+                }
+                return new Uri($this->endpoint->withPath('') . $relative);
+            }
+        }
+        if (!empty($relative) && $relative !== '/' && !$isModifiedModel && $serviceName !== 's3') {
+            $this->normalizePath($path);
         }
         // If endpoint has path, remove leading '/' to preserve URI resolution.
         if ($path && $relative[0] === '/') {
-            $relative = \substr($relative, 1);
+            $relative = substr($relative, 1);
         }
-        //Append path to endpoint when leading '//...' present
-        // as uri cannot be properly resolved
-        if ($this->api->isModifiedModel() && \strpos($relative, '//') === 0) {
+        //Append path to endpoint when leading '//...'
+        // present as uri cannot be properly resolved
+        if ($isModifiedModel && strpos($relative, '//') === 0) {
             return new Uri($this->endpoint . $relative);
         }
         // Expand path place holders using Amazon's slightly different URI
@@ -204,7 +209,7 @@ abstract class RestSerializer
                 $potentiallyEmptyTypes[] = 'structure';
             }
             $payloadMember = $input->getMember($payload);
-            if (\in_array($payloadMember['type'], $potentiallyEmptyTypes)) {
+            if (in_array($payloadMember['type'], $potentiallyEmptyTypes)) {
                 return \false;
             }
         }
@@ -218,7 +223,7 @@ abstract class RestSerializer
     private function appendQuery($query, $endpoint)
     {
         $append = Psr7\Query::build($query);
-        return $endpoint .= \strpos($endpoint, '?') !== \false ? "&{$append}" : "?{$append}";
+        return $endpoint .= strpos($endpoint, '?') !== \false ? "&{$append}" : "?{$append}";
     }
     private function getVarDefinitions($command, $args)
     {
@@ -229,5 +234,19 @@ abstract class RestSerializer
             }
         }
         return $varDefinitions;
+    }
+    /**
+     * Appends trailing slash to non-empty paths with at least one segment
+     * to ensure proper URI resolution
+     *
+     * @param string $path
+     *
+     * @return void
+     */
+    private function normalizePath(string $path): void
+    {
+        if (!empty($path) && $path !== '/' && substr($path, -1) !== '/') {
+            $this->endpoint = $this->endpoint->withPath($path . '/');
+        }
     }
 }

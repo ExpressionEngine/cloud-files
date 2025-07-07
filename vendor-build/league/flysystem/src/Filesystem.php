@@ -49,7 +49,7 @@ class Filesystem implements FilesystemInterface
     public function has($path)
     {
         $path = Util::normalizePath($path);
-        return \strlen($path) === 0 ? \false : (bool) $this->getAdapter()->has($path);
+        return strlen($path) === 0 ? \false : (bool) $this->getAdapter()->has($path);
     }
     /**
      * @inheritdoc
@@ -66,7 +66,7 @@ class Filesystem implements FilesystemInterface
      */
     public function writeStream($path, $resource, array $config = [])
     {
-        if (!\is_resource($resource) || \get_resource_type($resource) !== 'stream') {
+        if (!is_resource($resource) || get_resource_type($resource) !== 'stream') {
             throw new InvalidArgumentException(__METHOD__ . ' expects argument #2 to be a valid resource.');
         }
         $path = Util::normalizePath($path);
@@ -92,7 +92,7 @@ class Filesystem implements FilesystemInterface
      */
     public function putStream($path, $resource, array $config = [])
     {
-        if (!\is_resource($resource) || \get_resource_type($resource) !== 'stream') {
+        if (!is_resource($resource) || get_resource_type($resource) !== 'stream') {
             throw new InvalidArgumentException(__METHOD__ . ' expects argument #2 to be a valid resource.');
         }
         $path = Util::normalizePath($path);
@@ -132,7 +132,7 @@ class Filesystem implements FilesystemInterface
      */
     public function updateStream($path, $resource, array $config = [])
     {
-        if (!\is_resource($resource) || \get_resource_type($resource) !== 'stream') {
+        if (!is_resource($resource) || get_resource_type($resource) !== 'stream') {
             throw new InvalidArgumentException(__METHOD__ . ' expects argument #2 to be a valid resource.');
         }
         $path = Util::normalizePath($path);
@@ -148,7 +148,7 @@ class Filesystem implements FilesystemInterface
     {
         $path = Util::normalizePath($path);
         $this->assertPresent($path);
-        if (!($object = $this->getAdapter()->read($path))) {
+        if (!$object = $this->getAdapter()->read($path)) {
             return \false;
         }
         return $object['contents'];
@@ -160,7 +160,7 @@ class Filesystem implements FilesystemInterface
     {
         $path = Util::normalizePath($path);
         $this->assertPresent($path);
-        if (!($object = $this->getAdapter()->readStream($path))) {
+        if (!$object = $this->getAdapter()->readStream($path)) {
             return \false;
         }
         return $object['stream'];
@@ -232,7 +232,7 @@ class Filesystem implements FilesystemInterface
     {
         $path = Util::normalizePath($path);
         $this->assertPresent($path);
-        if (!($object = $this->getAdapter()->getMimetype($path)) || !\array_key_exists('mimetype', $object)) {
+        if (!($object = $this->getAdapter()->getMimetype($path)) || !array_key_exists('mimetype', $object)) {
             return \false;
         }
         return $object['mimetype'];
@@ -244,7 +244,7 @@ class Filesystem implements FilesystemInterface
     {
         $path = Util::normalizePath($path);
         $this->assertPresent($path);
-        if (!($object = $this->getAdapter()->getTimestamp($path)) || !\array_key_exists('timestamp', $object)) {
+        if (!($object = $this->getAdapter()->getTimestamp($path)) || !array_key_exists('timestamp', $object)) {
             return \false;
         }
         return (int) $object['timestamp'];
@@ -256,7 +256,7 @@ class Filesystem implements FilesystemInterface
     {
         $path = Util::normalizePath($path);
         $this->assertPresent($path);
-        if (!($object = $this->getAdapter()->getVisibility($path)) || !\array_key_exists('visibility', $object)) {
+        if (!($object = $this->getAdapter()->getVisibility($path)) || !array_key_exists('visibility', $object)) {
             return \false;
         }
         return $object['visibility'];
@@ -268,7 +268,7 @@ class Filesystem implements FilesystemInterface
     {
         $path = Util::normalizePath($path);
         $this->assertPresent($path);
-        if (!($object = $this->getAdapter()->getSize($path)) || !\array_key_exists('size', $object)) {
+        if (!($object = $this->getAdapter()->getSize($path)) || !array_key_exists('size', $object)) {
             return \false;
         }
         return (int) $object['size'];

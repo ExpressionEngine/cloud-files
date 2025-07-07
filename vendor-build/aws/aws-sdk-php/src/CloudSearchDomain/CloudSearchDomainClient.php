@@ -4,6 +4,7 @@ namespace ExpressionEngine\Dependency\Aws\CloudSearchDomain;
 
 use ExpressionEngine\Dependency\Aws\AwsClient;
 use ExpressionEngine\Dependency\Aws\CommandInterface;
+use ExpressionEngine\Dependency\Aws\HandlerList;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7\Uri;
 use ExpressionEngine\Dependency\Psr\Http\Message\RequestInterface;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7;
@@ -32,8 +33,9 @@ class CloudSearchDomainClient extends AwsClient
         $args['region']['default'] = function (array $args) {
             // Determine the region from the provided endpoint.
             // (e.g. http://search-blah.{region}.cloudsearch.amazonaws.com)
-            return \explode('.', new Uri($args['endpoint']))[1];
+            return explode('.', new Uri($args['endpoint']))[1];
         };
+        unset($args['endpoint']['default']);
         return $args;
     }
     /**
@@ -44,7 +46,7 @@ class CloudSearchDomainClient extends AwsClient
     private function searchByPost()
     {
         return static function (callable $handler) {
-            return function (CommandInterface $c, RequestInterface $r = null) use($handler) {
+            return function (CommandInterface $c, ?RequestInterface $r = null) use ($handler) {
                 if ($c->getName() !== 'Search') {
                     return $handler($c, $r);
                 }
@@ -66,7 +68,7 @@ class CloudSearchDomainClient extends AwsClient
             return $r;
         }
         $query = $r->getUri()->getQuery();
-        $req = $r->withMethod('POST')->withBody(Psr7\Utils::streamFor($query))->withHeader('Content-Length', \strlen($query))->withHeader('Content-Type', 'application/x-www-form-urlencoded')->withUri($r->getUri()->withQuery(''));
+        $req = $r->withMethod('POST')->withBody(Psr7\Utils::streamFor($query))->withHeader('Content-Length', strlen($query))->withHeader('Content-Type', 'application/x-www-form-urlencoded')->withUri($r->getUri()->withQuery(''));
         return $req;
     }
 }

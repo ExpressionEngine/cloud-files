@@ -42,8 +42,8 @@ class AuthTokenGenerator
      */
     public function createToken($endpoint, $region, $username, $lifetime = 15)
     {
-        if (!\is_numeric($lifetime) || $lifetime > 15 || $lifetime <= 0) {
-            throw new \InvalidArgumentException("Lifetime must be a positive number less than or equal to 15, was {$lifetime}", null);
+        if (!is_numeric($lifetime) || $lifetime > 15 || $lifetime <= 0) {
+            throw new \InvalidArgumentException("Lifetime must be a positive number less than or equal to 15, was {$lifetime}");
         }
         $uri = new Uri($endpoint);
         $uri = $uri->withPath('/');
@@ -53,6 +53,6 @@ class AuthTokenGenerator
         $provider = $this->credentialProvider;
         $url = (string) $signer->presign($request, $provider()->wait(), '+' . $lifetime . ' minutes')->getUri();
         // Remove 2 extra slash from the presigned url result
-        return \substr($url, 2);
+        return substr($url, 2);
     }
 }

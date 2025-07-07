@@ -59,12 +59,12 @@ class MultipartCopy extends AbstractUploadManager
      */
     public function __construct(S3ClientInterface $client, $source, array $config = [])
     {
-        if (\is_array($source)) {
+        if (is_array($source)) {
             $this->source = $source;
         } else {
             $this->source = $this->getInputSource($source);
         }
-        parent::__construct($client, \array_change_key_case($config) + ['source_metadata' => null]);
+        parent::__construct($client, array_change_key_case($config) + ['source_metadata' => null]);
     }
     /**
      * An alias of the self::upload method.
@@ -81,13 +81,13 @@ class MultipartCopy extends AbstractUploadManager
     }
     protected function getUploadCommands(callable $resultHandler)
     {
-        $parts = \ceil($this->getSourceSize() / $this->determinePartSize());
+        $parts = ceil($this->getSourceSize() / $this->determinePartSize());
         for ($partNumber = 1; $partNumber <= $parts; $partNumber++) {
             // If we haven't already uploaded this part, yield a new part.
             if (!$this->state->hasPartBeenUploaded($partNumber)) {
                 $command = $this->client->getCommand($this->info['command']['upload'], $this->createPart($partNumber, $parts) + $this->getState()->getId());
                 $command->getHandlerList()->appendSign($resultHandler, 'mup');
-                (yield $command);
+                yield $command;
             }
         }
     }
@@ -102,12 +102,12 @@ class MultipartCopy extends AbstractUploadManager
         }
         // The source parameter here is usually a string, but can be overloaded as an array
         // if the key contains a '?' character to specify where the query parameters start
-        if (\is_array($this->source)) {
-            $key = \str_replace('%2F', '/', \rawurlencode($this->source['source_key']));
+        if (is_array($this->source)) {
+            $key = str_replace('%2F', '/', rawurlencode($this->source['source_key']));
             $bucket = $this->source['source_bucket'];
         } else {
-            list($bucket, $key) = \explode('/', \ltrim($this->source, '/'), 2);
-            $key = \implode('/', \array_map('urlencode', \explode('/', \rawurldecode($key))));
+            list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
+            $key = implode('/', array_map('urlencode', explode('/', rawurldecode($key))));
         }
         $uri = ArnParser::isArn($bucket) ? '' : '/';
         $uri .= $bucket . '/' . $key;
@@ -148,7 +148,7 @@ class MultipartCopy extends AbstractUploadManager
             return $this->config['source_metadata'];
         }
         //if the source variable was overloaded with an array, use the inputs for key and bucket
-        if (\is_array($this->source)) {
+        if (is_array($this->source)) {
             $headParams = ['Key' => $this->source['source_key'], 'Bucket' => $this->source['source_bucket']];
             if (isset($this->source['source_version_id'])) {
                 $this->sourceVersionId = $this->source['source_version_id'];
@@ -156,10 +156,10 @@ class MultipartCopy extends AbstractUploadManager
             }
             //otherwise, use the default source parsing behavior
         } else {
-            list($bucket, $key) = \explode('/', \ltrim($this->source, '/'), 2);
+            list($bucket, $key) = explode('/', ltrim($this->source, '/'), 2);
             $headParams = ['Bucket' => $bucket, 'Key' => $key];
-            if (\strpos($key, '?')) {
-                list($key, $query) = \explode('?', $key, 2);
+            if (strpos($key, '?')) {
+                list($key, $query) = explode('?', $key, 2);
                 $headParams['Key'] = $key;
                 $query = Psr7\Query::parse($query, \false);
                 if (isset($query['versionId'])) {
@@ -180,7 +180,7 @@ class MultipartCopy extends AbstractUploadManager
     private function getInputSource($inputSource)
     {
         $sourceBuilder = ArnParser::isArn($inputSource) ? '' : '/';
-        $sourceBuilder .= \ltrim(\rawurldecode($inputSource), '/');
+        $sourceBuilder .= ltrim(rawurldecode($inputSource), '/');
         return $sourceBuilder;
     }
 }

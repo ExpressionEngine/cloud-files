@@ -27,13 +27,15 @@ class MultiRegionClient implements AwsClientInterface
     private $customHandler;
     public static function getArguments()
     {
-        $args = \array_intersect_key(ClientResolver::getDefaultArguments(), ['service' => \true, 'region' => \true]);
+        $args = array_intersect_key(ClientResolver::getDefaultArguments(), ['service' => \true, 'region' => \true]);
         $args['region']['required'] = \false;
+        unset($args['region']['fn']);
+        unset($args['region']['default']);
         return $args + ['client_factory' => ['type' => 'config', 'valid' => ['callable'], 'doc' => 'A callable that takes an array of client' . ' configuration arguments and returns a regionalized' . ' client.', 'required' => \true, 'internal' => \true, 'default' => function (array $args) {
             $namespace = manifest($args['service'])['namespace'];
             $klass = "Aws\\{$namespace}\\{$namespace}Client";
             $region = isset($args['region']) ? $args['region'] : null;
-            return function (array $args) use($klass, $region) {
+            return function (array $args) use ($klass, $region) {
                 if ($region && empty($args['region'])) {
                     $args['region'] = $region;
                 }
@@ -43,7 +45,7 @@ class MultiRegionClient implements AwsClientInterface
             $region = isset($args['region']) ? $args['region'] : '';
             return PartitionEndpointProvider::defaultProvider()->getPartition($region, $args['service']);
         }, 'fn' => function ($value, array &$args) {
-            if (\is_string($value)) {
+            if (is_string($value)) {
                 $value = PartitionEndpointProvider::defaultProvider()->getPartitionByName($value);
             }
             if (!$value instanceof PartitionInterface) {
@@ -87,7 +89,7 @@ class MultiRegionClient implements AwsClientInterface
         $this->config = $args['config'];
         $this->factory = $args['client_factory'];
         $this->partition = $args['partition'];
-        $this->args = \array_diff_key($args, $args['config']);
+        $this->args = array_diff_key($args, $args['config']);
     }
     /**
      * Get the region to which the client is configured to send requests by
@@ -166,7 +168,7 @@ class MultiRegionClient implements AwsClientInterface
     {
         if (empty($this->clientPool[$region])) {
             $factory = $this->factory;
-            $this->clientPool[$region] = $factory(\array_replace($this->args, \array_filter(['region' => $region])));
+            $this->clientPool[$region] = $factory(array_replace($this->args, array_filter(['region' => $region])));
         }
         return $this->clientPool[$region];
     }
@@ -177,11 +179,11 @@ class MultiRegionClient implements AwsClientInterface
      */
     private function parseClass()
     {
-        $klass = \get_class($this);
+        $klass = get_class($this);
         if ($klass === __CLASS__) {
             return '';
         }
-        return \strtolower(\substr($klass, \strrpos($klass, '\\') + 1, -17));
+        return strtolower(substr($klass, strrpos($klass, '\\') + 1, -17));
     }
     private function getRegionFromArgs(array $args)
     {

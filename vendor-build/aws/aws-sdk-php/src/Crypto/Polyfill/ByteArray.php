@@ -4,7 +4,6 @@ namespace ExpressionEngine\Dependency\Aws\Crypto\Polyfill;
 
 /**
  * Class ByteArray
- * @package Aws\Crypto\Polyfill
  */
 class ByteArray extends \SplFixedArray
 {
@@ -28,7 +27,7 @@ class ByteArray extends \SplFixedArray
             $size = \count($arr);
         } elseif (\is_string($size)) {
             // We need to avoid mbstring.func_overload
-            if (\is_callable('\\mb_str_split')) {
+            if (\is_callable('\mb_str_split')) {
                 $tmp = \mb_str_split($size, 1, '8bit');
             } else {
                 $tmp = \str_split($size, 1);
@@ -37,7 +36,7 @@ class ByteArray extends \SplFixedArray
             $arr = [];
             if (!empty($tmp)) {
                 foreach ($tmp as $t) {
-                    if (\strlen($t) < 1) {
+                    if (strlen($t) < 1) {
                         continue;
                     }
                     $arr[] = \unpack('C', $t)[1] & 0xff;
@@ -126,6 +125,7 @@ class ByteArray extends \SplFixedArray
      * @param int $newval
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($index, $newval)
     {
         parent::offsetSet($index, $newval & 0xff);
@@ -180,8 +180,8 @@ class ByteArray extends \SplFixedArray
      */
     public function set(ByteArray $input, $offset = 0, $length = null)
     {
-        self::needs(\is_int($offset) && $offset >= 0, 'Offset must be a positive integer or zero');
-        if (\is_null($length)) {
+        self::needs(is_int($offset) && $offset >= 0, 'Offset must be a positive integer or zero');
+        if (is_null($length)) {
             $length = $input->count();
         }
         $i = 0;
@@ -229,6 +229,6 @@ class ByteArray extends \SplFixedArray
         $args = $this->toArray();
         \array_unshift($args, \str_repeat('C', $count));
         // constant-time, PHP <5.6 equivalent to pack('C*', ...$args);
-        return \call_user_func_array('\\pack', $args);
+        return \call_user_func_array('\pack', $args);
     }
 }

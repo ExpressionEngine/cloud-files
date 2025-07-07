@@ -33,7 +33,7 @@ class S3EncryptionMultipartUploader extends MultipartUploader
      */
     public static function isSupportedCipher($cipherName)
     {
-        return \in_array($cipherName, AbstractCryptoClient::$supportedCiphers);
+        return in_array($cipherName, AbstractCryptoClient::$supportedCiphers);
     }
     private $provider;
     private $instructionFileSuffix;
@@ -130,7 +130,7 @@ class S3EncryptionMultipartUploader extends MultipartUploader
         return function () {
             // Defer encryption work until promise is executed
             $envelope = new MetadataEnvelope();
-            list($this->source, $params) = Promise\Create::promiseFor($this->encrypt($this->source, $this->config['@cipheroptions'] ?: [], $this->provider, $envelope))->then(function ($bodyStream) use($envelope) {
+            list($this->source, $params) = Promise\Create::promiseFor($this->encrypt($this->source, $this->config['@cipheroptions'] ?: [], $this->provider, $envelope))->then(function ($bodyStream) use ($envelope) {
                 $params = $this->strategy->save($envelope, $this->config['params']);
                 return [$bodyStream, $params];
             })->wait();

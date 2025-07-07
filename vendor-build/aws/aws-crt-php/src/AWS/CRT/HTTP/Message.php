@@ -44,16 +44,16 @@ abstract class Message extends NativeResource
     {
         $method = Encoding::readString($buf);
         $path_and_query = Encoding::readString($buf);
-        $parts = \explode("?", $path_and_query, 2);
+        $parts = explode("?", $path_and_query, 2);
         $path = isset($parts[0]) ? $parts[0] : "";
         $query = isset($parts[1]) ? $parts[1] : "";
         $headers = Headers::unmarshall($buf);
         // Turn query params back into a dictionary
-        if (\strlen($query)) {
-            $query = \rawurldecode($query);
-            $query = \explode("&", $query);
-            $query = \array_reduce($query, function ($params, $pair) {
-                list($param, $value) = \explode("=", $pair, 2);
+        if (strlen($query)) {
+            $query = rawurldecode($query);
+            $query = explode("&", $query);
+            $query = array_reduce($query, function ($params, $pair) {
+                list($param, $value) = explode("=", $pair, 2);
                 $params[$param] = $value;
                 return $params;
             }, []);
@@ -67,11 +67,11 @@ abstract class Message extends NativeResource
         $path = $this->path;
         $queries = [];
         foreach ($this->query as $param => $value) {
-            $queries[] = \urlencode($param) . "=" . \urlencode($value);
+            $queries[] = urlencode($param) . "=" . urlencode($value);
         }
-        $query = \implode("&", $queries);
-        if (\strlen($query)) {
-            $path = \implode("?", [$path, $query]);
+        $query = implode("&", $queries);
+        if (strlen($query)) {
+            $path = implode("?", [$path, $query]);
         }
         return $path;
     }

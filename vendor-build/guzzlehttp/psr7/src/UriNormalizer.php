@@ -9,7 +9,7 @@ use ExpressionEngine\Dependency\Psr\Http\Message\UriInterface;
  *
  * @author Tobias Schultze
  *
- * @link https://tools.ietf.org/html/rfc3986#section-6
+ * @see https://datatracker.ietf.org/doc/html/rfc3986#section-6
  */
 final class UriNormalizer
 {
@@ -102,9 +102,9 @@ final class UriNormalizer
      * @param UriInterface $uri   The URI to normalize
      * @param int          $flags A bitmask of normalizations to apply, see constants
      *
-     * @link https://tools.ietf.org/html/rfc3986#section-6.2
+     * @see https://datatracker.ietf.org/doc/html/rfc3986#section-6.2
      */
-    public static function normalize(UriInterface $uri, int $flags = self::PRESERVING_NORMALIZATIONS) : UriInterface
+    public static function normalize(UriInterface $uri, int $flags = self::PRESERVING_NORMALIZATIONS): UriInterface
     {
         if ($flags & self::CAPITALIZE_PERCENT_ENCODING) {
             $uri = self::capitalizePercentEncoding($uri);
@@ -125,12 +125,12 @@ final class UriNormalizer
             $uri = $uri->withPath(UriResolver::removeDotSegments($uri->getPath()));
         }
         if ($flags & self::REMOVE_DUPLICATE_SLASHES) {
-            $uri = $uri->withPath(\preg_replace('#//++#', '/', $uri->getPath()));
+            $uri = $uri->withPath(preg_replace('#//++#', '/', $uri->getPath()));
         }
         if ($flags & self::SORT_QUERY_PARAMETERS && $uri->getQuery() !== '') {
-            $queryKeyValues = \explode('&', $uri->getQuery());
-            \sort($queryKeyValues);
-            $uri = $uri->withQuery(\implode('&', $queryKeyValues));
+            $queryKeyValues = explode('&', $uri->getQuery());
+            sort($queryKeyValues);
+            $uri = $uri->withQuery(implode('&', $queryKeyValues));
         }
         return $uri;
     }
@@ -146,27 +146,27 @@ final class UriNormalizer
      * @param UriInterface $uri2           An URI to compare
      * @param int          $normalizations A bitmask of normalizations to apply, see constants
      *
-     * @link https://tools.ietf.org/html/rfc3986#section-6.1
+     * @see https://datatracker.ietf.org/doc/html/rfc3986#section-6.1
      */
-    public static function isEquivalent(UriInterface $uri1, UriInterface $uri2, int $normalizations = self::PRESERVING_NORMALIZATIONS) : bool
+    public static function isEquivalent(UriInterface $uri1, UriInterface $uri2, int $normalizations = self::PRESERVING_NORMALIZATIONS): bool
     {
         return (string) self::normalize($uri1, $normalizations) === (string) self::normalize($uri2, $normalizations);
     }
-    private static function capitalizePercentEncoding(UriInterface $uri) : UriInterface
+    private static function capitalizePercentEncoding(UriInterface $uri): UriInterface
     {
         $regex = '/(?:%[A-Fa-f0-9]{2})++/';
-        $callback = function (array $match) {
-            return \strtoupper($match[0]);
+        $callback = function (array $match): string {
+            return strtoupper($match[0]);
         };
-        return $uri->withPath(\preg_replace_callback($regex, $callback, $uri->getPath()))->withQuery(\preg_replace_callback($regex, $callback, $uri->getQuery()));
+        return $uri->withPath(preg_replace_callback($regex, $callback, $uri->getPath()))->withQuery(preg_replace_callback($regex, $callback, $uri->getQuery()));
     }
-    private static function decodeUnreservedCharacters(UriInterface $uri) : UriInterface
+    private static function decodeUnreservedCharacters(UriInterface $uri): UriInterface
     {
         $regex = '/%(?:2D|2E|5F|7E|3[0-9]|[46][1-9A-F]|[57][0-9A])/i';
-        $callback = function (array $match) {
-            return \rawurldecode($match[0]);
+        $callback = function (array $match): string {
+            return rawurldecode($match[0]);
         };
-        return $uri->withPath(\preg_replace_callback($regex, $callback, $uri->getPath()))->withQuery(\preg_replace_callback($regex, $callback, $uri->getQuery()));
+        return $uri->withPath(preg_replace_callback($regex, $callback, $uri->getPath()))->withQuery(preg_replace_callback($regex, $callback, $uri->getQuery()));
     }
     private function __construct()
     {

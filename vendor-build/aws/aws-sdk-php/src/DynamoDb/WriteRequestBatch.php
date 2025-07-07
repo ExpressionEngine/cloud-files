@@ -59,10 +59,10 @@ class WriteRequestBatch
             throw new \InvalidArgumentException('"batch_size" must be between 2 and 25.');
         }
         // Ensure the callbacks are valid
-        if ($config['before'] && !\is_callable($config['before'])) {
+        if ($config['before'] && !is_callable($config['before'])) {
             throw new \InvalidArgumentException('"before" must be callable.');
         }
-        if ($config['error'] && !\is_callable($config['error'])) {
+        if ($config['error'] && !is_callable($config['error'])) {
             throw new \InvalidArgumentException('"error" must be callable.');
         }
         // If autoflush is enabled, set the threshold
@@ -141,7 +141,7 @@ class WriteRequestBatch
                     $code = $reason->getAwsErrorCode();
                     if ($code === 'ProvisionedThroughputExceededException') {
                         $this->retryUnprocessed($reason->getCommand()['RequestItems']);
-                    } elseif (\is_callable($this->config['error'])) {
+                    } elseif (is_callable($this->config['error'])) {
                         $this->config['error']($reason);
                     }
                 }
@@ -159,7 +159,7 @@ class WriteRequestBatch
     private function prepareCommands()
     {
         // Chunk the queue into batches
-        $batches = \array_chunk($this->queue, $this->config['batch_size']);
+        $batches = array_chunk($this->queue, $this->config['batch_size']);
         $this->queue = [];
         // Create BatchWriteItem commands for each batch
         $commands = [];
@@ -193,7 +193,7 @@ class WriteRequestBatch
      */
     private function autoFlush()
     {
-        if ($this->config['autoflush'] && \count($this->queue) >= $this->config['threshold']) {
+        if ($this->config['autoflush'] && count($this->queue) >= $this->config['threshold']) {
             // Flush only once. Unprocessed items are handled in a later flush.
             $this->flush(\false);
         }

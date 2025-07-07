@@ -55,7 +55,7 @@ class EndpointArnMiddleware
      */
     public static function wrap(Service $service, $region, array $config, $isUseEndpointV2)
     {
-        return function (callable $handler) use($service, $region, $config, $isUseEndpointV2) {
+        return function (callable $handler) use ($service, $region, $config, $isUseEndpointV2) {
             return new self($handler, $service, $region, $config, $isUseEndpointV2);
         };
     }
@@ -72,7 +72,7 @@ class EndpointArnMiddleware
     {
         $nextHandler = $this->nextHandler;
         $op = $this->service->getOperation($cmd->getName())->toArray();
-        if (!empty($op['input']['shape']) && !\in_array($cmd->getName(), self::$nonArnableCmds)) {
+        if (!empty($op['input']['shape']) && !in_array($cmd->getName(), self::$nonArnableCmds)) {
             $service = $this->service->toArray();
             if (!empty($input = $service['shapes'][$op['input']['shape']])) {
                 // Stores member name that targets 'BucketName' shape
@@ -89,12 +89,12 @@ class EndpointArnMiddleware
                 }
                 // Determine if appropriate member contains ARN value and is
                 // eligible for ARN expansion
-                if (!\is_null($bucketNameMember) && !empty($cmd[$bucketNameMember]) && !\in_array($cmd->getName(), self::$selectiveNonArnableCmds['BucketName']) && ArnParser::isArn($cmd[$bucketNameMember])) {
+                if (!is_null($bucketNameMember) && !empty($cmd[$bucketNameMember]) && !in_array($cmd->getName(), self::$selectiveNonArnableCmds['BucketName']) && ArnParser::isArn($cmd[$bucketNameMember])) {
                     $arn = ArnParser::parse($cmd[$bucketNameMember]);
-                    !$this->isUseEndpointV2 && ($partition = $this->validateBucketArn($arn));
-                } elseif (!\is_null($accesspointNameMember) && !empty($cmd[$accesspointNameMember]) && !\in_array($cmd->getName(), self::$selectiveNonArnableCmds['AccessPointName']) && ArnParser::isArn($cmd[$accesspointNameMember])) {
+                    !$this->isUseEndpointV2 && $partition = $this->validateBucketArn($arn);
+                } elseif (!is_null($accesspointNameMember) && !empty($cmd[$accesspointNameMember]) && !in_array($cmd->getName(), self::$selectiveNonArnableCmds['AccessPointName']) && ArnParser::isArn($cmd[$accesspointNameMember])) {
                     $arn = ArnParser::parse($cmd[$accesspointNameMember]);
-                    !$this->isUseEndpointV2 && ($partition = $this->validateAccessPointArn($arn));
+                    !$this->isUseEndpointV2 && $partition = $this->validateAccessPointArn($arn);
                 }
                 // Process only if an appropriate member contains an ARN value
                 // and is an Outposts ARN
@@ -108,18 +108,18 @@ class EndpointArnMiddleware
                     $path = $req->getUri()->getPath();
                     if ($arn instanceof AccessPointArnInterface) {
                         // Replace ARN with access point name
-                        $path = \str_replace(\urlencode($cmd[$accesspointNameMember]), $arn->getAccesspointName(), $path);
+                        $path = str_replace(urlencode($cmd[$accesspointNameMember]), $arn->getAccesspointName(), $path);
                         // Replace ARN in the payload
                         $req->getBody()->seek(0);
-                        $body = Psr7\Utils::streamFor(\str_replace($cmd[$accesspointNameMember], $arn->getAccesspointName(), $req->getBody()->getContents()));
+                        $body = Psr7\Utils::streamFor(str_replace($cmd[$accesspointNameMember], $arn->getAccesspointName(), $req->getBody()->getContents()));
                         // Replace ARN in the command
                         $cmd[$accesspointNameMember] = $arn->getAccesspointName();
                     } elseif ($arn instanceof BucketArnInterface) {
                         // Replace ARN in the path
-                        $path = \str_replace(\urlencode($cmd[$bucketNameMember]), $arn->getBucketName(), $path);
+                        $path = str_replace(urlencode($cmd[$bucketNameMember]), $arn->getBucketName(), $path);
                         // Replace ARN in the payload
                         $req->getBody()->seek(0);
-                        $newBody = \str_replace($cmd[$bucketNameMember], $arn->getBucketName(), $req->getBody()->getContents());
+                        $newBody = str_replace($cmd[$bucketNameMember], $arn->getBucketName(), $req->getBody()->getContents());
                         $body = Psr7\Utils::streamFor($newBody);
                         // Replace ARN in the command
                         $cmd[$bucketNameMember] = $arn->getBucketName();
@@ -162,7 +162,7 @@ class EndpointArnMiddleware
         // For operations that redirect endpoint & signing service based on
         // presence of OutpostId member. These operations will likely not
         // overlap with operations that perform ARN expansion.
-        if (\in_array($cmd->getName(), self::$outpostIdRedirectCmds) && !empty($cmd['OutpostId'])) {
+        if (in_array($cmd->getName(), self::$outpostIdRedirectCmds) && !empty($cmd['OutpostId'])) {
             $req = $req->withUri($req->getUri()->withHost($this->generateOutpostIdHost()));
             $cmd['@context']['signing_service'] = 's3-outposts';
         }

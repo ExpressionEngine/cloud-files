@@ -84,8 +84,8 @@ trait S3ClientTrait
         $params = ['Bucket' => $bucket, 'Prefix' => $prefix];
         $iter = $this->getIterator('ListObjects', $params);
         if ($regex) {
-            $iter = \ExpressionEngine\Dependency\Aws\filter($iter, function ($c) use($regex) {
-                return \preg_match($regex, $c['Key']);
+            $iter = \ExpressionEngine\Dependency\Aws\filter($iter, function ($c) use ($regex) {
+                return preg_match($regex, $c['Key']);
             });
         }
         return BatchDelete::fromIterator($this, $bucket, $iter, $options)->promise();
@@ -102,7 +102,7 @@ trait S3ClientTrait
      */
     public function uploadDirectoryAsync($directory, $bucket, $keyPrefix = null, array $options = [])
     {
-        $d = "s3://{$bucket}" . ($keyPrefix ? '/' . \ltrim($keyPrefix, '/') : '');
+        $d = "s3://{$bucket}" . ($keyPrefix ? '/' . ltrim($keyPrefix, '/') : '');
         return (new Transfer($this, $directory, $d, $options))->promise();
     }
     /**
@@ -117,7 +117,7 @@ trait S3ClientTrait
      */
     public function downloadBucketAsync($directory, $bucket, $keyPrefix = '', array $options = [])
     {
-        $s = "s3://{$bucket}" . ($keyPrefix ? '/' . \ltrim($keyPrefix, '/') : '');
+        $s = "s3://{$bucket}" . ($keyPrefix ? '/' . ltrim($keyPrefix, '/') : '');
         return (new Transfer($this, $s, $directory, $options))->promise();
     }
     /**
@@ -253,21 +253,21 @@ trait S3ClientTrait
     /**
      * @see S3ClientInterface::execute()
      */
-    public abstract function execute(CommandInterface $command);
+    abstract public function execute(CommandInterface $command);
     /**
      * @see S3ClientInterface::getCommand()
      */
-    public abstract function getCommand($name, array $args = []);
+    abstract public function getCommand($name, array $args = []);
     /**
      * @see S3ClientInterface::getHandlerList()
      *
      * @return HandlerList
      */
-    public abstract function getHandlerList();
+    abstract public function getHandlerList();
     /**
      * @see S3ClientInterface::getIterator()
      *
      * @return \Iterator
      */
-    public abstract function getIterator($name, array $args = []);
+    abstract public function getIterator($name, array $args = []);
 }

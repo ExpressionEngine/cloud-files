@@ -41,15 +41,15 @@ trait SessionConnectionConfigTrait
     {
         if (!empty($config)) {
             foreach ($config as $key => $value) {
-                $method = 'set' . \str_replace('_', '', \ucwords($key, '_'));
-                if (\method_exists($this, $method)) {
-                    \call_user_func_array(array($this, $method), array($value));
+                $method = 'set' . str_replace('_', '', ucwords($key, '_'));
+                if (method_exists($this, $method)) {
+                    call_user_func_array(array($this, $method), array($value));
                 }
             }
         }
         // It applies the default PHP session lifetime, if no session lifetime config is provided
         if (!isset($config['session_lifetime'])) {
-            $this->setSessionLifetime((int) \ini_get('session.gc_maxlifetime'));
+            $this->setSessionLifetime((int) ini_get('session.gc_maxlifetime'));
         }
     }
     /**

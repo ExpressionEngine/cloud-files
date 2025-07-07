@@ -29,9 +29,9 @@ class CognitoIdentityProvider
             if ($this->accountId) {
                 $getIdParams['AccountId'] = $this->accountId;
             }
-            $id = (yield $this->client->getId($getIdParams));
-            $result = (yield $this->client->getCredentialsForIdentity(['IdentityId' => $id['IdentityId']] + $params));
-            (yield new Credentials($result['Credentials']['AccessKeyId'], $result['Credentials']['SecretKey'], $result['Credentials']['SessionToken'], (int) $result['Credentials']['Expiration']->format('U')));
+            $id = yield $this->client->getId($getIdParams);
+            $result = yield $this->client->getCredentialsForIdentity(['IdentityId' => $id['IdentityId']] + $params);
+            yield new Credentials($result['Credentials']['AccessKeyId'], $result['Credentials']['SecretKey'], $result['Credentials']['SessionToken'], (int) $result['Credentials']['Expiration']->format('U'));
         });
     }
     public function updateLogin($key, $value)

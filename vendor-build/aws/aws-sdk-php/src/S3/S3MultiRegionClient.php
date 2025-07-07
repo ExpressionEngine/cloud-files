@@ -20,8 +20,12 @@ use ExpressionEngine\Dependency\GuzzleHttp\Promise;
  * @method \GuzzleHttp\Promise\Promise copyObjectAsync(array $args = [])
  * @method \Aws\Result createBucket(array $args = [])
  * @method \GuzzleHttp\Promise\Promise createBucketAsync(array $args = [])
+ * @method \Aws\Result createBucketMetadataTableConfiguration(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise createBucketMetadataTableConfigurationAsync(array $args = [])
  * @method \Aws\Result createMultipartUpload(array $args = [])
  * @method \GuzzleHttp\Promise\Promise createMultipartUploadAsync(array $args = [])
+ * @method \Aws\Result createSession(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise createSessionAsync(array $args = [])
  * @method \Aws\Result deleteBucket(array $args = [])
  * @method \GuzzleHttp\Promise\Promise deleteBucketAsync(array $args = [])
  * @method \Aws\Result deleteBucketAnalyticsConfiguration(array $args = [])
@@ -36,6 +40,8 @@ use ExpressionEngine\Dependency\GuzzleHttp\Promise;
  * @method \GuzzleHttp\Promise\Promise deleteBucketInventoryConfigurationAsync(array $args = [])
  * @method \Aws\Result deleteBucketLifecycle(array $args = [])
  * @method \GuzzleHttp\Promise\Promise deleteBucketLifecycleAsync(array $args = [])
+ * @method \Aws\Result deleteBucketMetadataTableConfiguration(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise deleteBucketMetadataTableConfigurationAsync(array $args = [])
  * @method \Aws\Result deleteBucketMetricsConfiguration(array $args = [])
  * @method \GuzzleHttp\Promise\Promise deleteBucketMetricsConfigurationAsync(array $args = [])
  * @method \Aws\Result deleteBucketOwnershipControls(array $args = [])
@@ -78,6 +84,8 @@ use ExpressionEngine\Dependency\GuzzleHttp\Promise;
  * @method \GuzzleHttp\Promise\Promise getBucketLocationAsync(array $args = [])
  * @method \Aws\Result getBucketLogging(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getBucketLoggingAsync(array $args = [])
+ * @method \Aws\Result getBucketMetadataTableConfiguration(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise getBucketMetadataTableConfigurationAsync(array $args = [])
  * @method \Aws\Result getBucketMetricsConfiguration(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getBucketMetricsConfigurationAsync(array $args = [])
  * @method \Aws\Result getBucketNotification(array $args = [])
@@ -132,6 +140,8 @@ use ExpressionEngine\Dependency\GuzzleHttp\Promise;
  * @method \GuzzleHttp\Promise\Promise listBucketMetricsConfigurationsAsync(array $args = [])
  * @method \Aws\Result listBuckets(array $args = [])
  * @method \GuzzleHttp\Promise\Promise listBucketsAsync(array $args = [])
+ * @method \Aws\Result listDirectoryBuckets(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise listDirectoryBucketsAsync(array $args = [])
  * @method \Aws\Result listMultipartUploads(array $args = [])
  * @method \GuzzleHttp\Promise\Promise listMultipartUploadsAsync(array $args = [])
  * @method \Aws\Result listObjectVersions(array $args = [])
@@ -216,8 +226,8 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
     {
         $args = parent::getArguments();
         $regionDef = $args['region'] + ['default' => function (array &$args) {
-            $availableRegions = \array_keys($args['partition']['regions']);
-            return \end($availableRegions);
+            $availableRegions = array_keys($args['partition']['regions']);
+            return end($availableRegions);
         }];
         unset($args['region']);
         return $args + ['bucket_region_cache' => ['type' => 'config', 'valid' => [CacheInterface::class], 'doc' => 'Cache of regions in which given buckets are located.', 'default' => function () {
@@ -233,14 +243,14 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
     private function determineRegionMiddleware()
     {
         return function (callable $handler) {
-            return function (CommandInterface $command) use($handler) {
+            return function (CommandInterface $command) use ($handler) {
                 $cacheKey = $this->getCacheKey($command['Bucket']);
-                if (empty($command['@region']) && ($region = $this->cache->get($cacheKey))) {
+                if (empty($command['@region']) && $region = $this->cache->get($cacheKey)) {
                     $command['@region'] = $region;
                 }
-                return Promise\Coroutine::of(function () use($handler, $command, $cacheKey) {
+                return Promise\Coroutine::of(function () use ($handler, $command, $cacheKey) {
                     try {
-                        (yield $handler($command));
+                        yield $handler($command);
                     } catch (PermanentRedirectException $e) {
                         if (empty($command['Bucket'])) {
                             throw $e;
@@ -251,17 +261,17 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
                             $region = $result['@metadata']['headers']['x-amz-bucket-region'];
                             $this->cache->set($cacheKey, $region);
                         } else {
-                            $region = (yield $this->determineBucketRegionAsync($command['Bucket']));
+                            $region = yield $this->determineBucketRegionAsync($command['Bucket']);
                         }
                         $command['@region'] = $region;
-                        (yield $handler($command));
+                        yield $handler($command);
                     } catch (AwsException $e) {
                         if ($e->getAwsErrorCode() === 'AuthorizationHeaderMalformed') {
                             $region = $this->determineBucketRegionFromExceptionBody($e->getResponse());
                             if (!empty($region)) {
                                 $this->cache->set($cacheKey, $region);
                                 $command['@region'] = $region;
-                                (yield $handler($command));
+                                yield $handler($command);
                             } else {
                                 throw $e;
                             }
@@ -276,11 +286,11 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
     public function createPresignedRequest(CommandInterface $command, $expires, array $options = [])
     {
         if (empty($command['Bucket'])) {
-            throw new \InvalidArgumentException('The S3\\MultiRegionClient' . ' cannot create presigned requests for commands without a' . ' specified bucket.');
+            throw new \InvalidArgumentException('The S3\MultiRegionClient' . ' cannot create presigned requests for commands without a' . ' specified bucket.');
         }
         /** @var S3ClientInterface $client */
         $client = $this->getClientFromPool($this->determineBucketRegion($command['Bucket']));
-        return $client->createPresignedRequest($client->getCommand($command->getName(), $command->toArray()), $expires);
+        return $client->createPresignedRequest($client->getCommand($command->getName(), $command->toArray()), $expires, $options);
     }
     public function getObjectUrl($bucket, $key)
     {
@@ -296,7 +306,7 @@ class S3MultiRegionClient extends BaseClient implements S3ClientInterface
         }
         /** @var S3ClientInterface $regionalClient */
         $regionalClient = $this->getClientFromPool();
-        return $regionalClient->determineBucketRegionAsync($bucketName)->then(function ($region) use($cacheKey) {
+        return $regionalClient->determineBucketRegionAsync($bucketName)->then(function ($region) use ($cacheKey) {
             $this->cache->set($cacheKey, $region);
             return $region;
         });

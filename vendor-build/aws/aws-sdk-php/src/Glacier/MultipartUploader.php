@@ -120,7 +120,7 @@ class MultipartUploader extends AbstractUploader
         // Make sure the part size is set.
         $partSize = $this->config['part_size'] ?: self::PART_MIN_SIZE;
         // Ensure that the part size is valid.
-        if (!\in_array($partSize, self::$validPartSizes)) {
+        if (!in_array($partSize, self::$validPartSizes)) {
             throw new \InvalidArgumentException('The part_size must be a power ' . 'of 2, in megabytes, such that 1 MB <= PART_SIZE <= 4 GB.');
         }
         return $partSize;
@@ -181,7 +181,7 @@ class MultipartUploader extends AbstractUploader
             $archiveSize += $part['size'];
             $treeHash->addChecksum($part['checksum']);
         }
-        return ['archiveSize' => $archiveSize, 'checksum' => \bin2hex($treeHash->complete())];
+        return ['archiveSize' => $archiveSize, 'checksum' => bin2hex($treeHash->complete())];
     }
     /**
      * Decorates a stream with a tree AND linear sha256 hashing stream.
@@ -194,12 +194,12 @@ class MultipartUploader extends AbstractUploader
     private function decorateWithHashes(Stream $stream, array &$data)
     {
         // Make sure that a tree hash is calculated.
-        $stream = new HashingStream($stream, new TreeHash(), function ($result) use(&$data) {
-            $data['checksum'] = \bin2hex($result);
+        $stream = new HashingStream($stream, new TreeHash(), function ($result) use (&$data) {
+            $data['checksum'] = bin2hex($result);
         });
         // Make sure that a linear SHA256 hash is calculated.
-        $stream = new HashingStream($stream, new PhpHash('sha256'), function ($result) use(&$data) {
-            $data['ContentSHA256'] = \bin2hex($result);
+        $stream = new HashingStream($stream, new PhpHash('sha256'), function ($result) use (&$data) {
+            $data['ContentSHA256'] = bin2hex($result);
         });
         return $stream;
     }
@@ -214,12 +214,12 @@ class MultipartUploader extends AbstractUploader
     private static function parseRange($range, $partSize)
     {
         // Strip away the prefix and suffix.
-        if (\strpos($range, 'bytes') !== \false) {
-            $range = \substr($range, 6, -2);
+        if (strpos($range, 'bytes') !== \false) {
+            $range = substr($range, 6, -2);
         }
         // Split that range into it's parts.
-        list($firstByte, $lastByte) = \explode('-', $range);
+        list($firstByte, $lastByte) = explode('-', $range);
         // Calculate and return range index and range size
-        return [\intval($firstByte / $partSize) + 1, $lastByte - $firstByte + 1];
+        return [intval($firstByte / $partSize) + 1, $lastByte - $firstByte + 1];
     }
 }

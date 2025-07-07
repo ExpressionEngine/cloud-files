@@ -29,7 +29,7 @@ class StandardSessionConnection implements SessionConnectionInterface
             // Get the item values
             $result = isset($result['Item']) ? $result['Item'] : [];
             foreach ($result as $key => $value) {
-                $item[$key] = \current($value);
+                $item[$key] = current($value);
             }
         } catch (DynamoDbException $e) {
             // Could not retrieve item, so return nothing.
@@ -39,7 +39,7 @@ class StandardSessionConnection implements SessionConnectionInterface
     public function write($id, $data, $isChanged)
     {
         // Prepare the attributes
-        $expires = \time() + $this->getSessionLifetime();
+        $expires = time() + $this->getSessionLifetime();
         $attributes = [$this->getSessionLifetimeAttribute() => ['Value' => ['N' => (string) $expires]], 'lock' => ['Action' => 'DELETE']];
         if ($isChanged) {
             if ($data != '') {
@@ -71,7 +71,7 @@ class StandardSessionConnection implements SessionConnectionInterface
     public function deleteExpired()
     {
         // Create a Scan iterator for finding expired session items
-        $scan = $this->client->getPaginator('Scan', ['TableName' => $this->getTableName(), 'AttributesToGet' => [$this->getHashKey()], 'ScanFilter' => [$this->getSessionLifetimeAttribute() => ['ComparisonOperator' => 'LT', 'AttributeValueList' => [['N' => (string) \time()]]], 'lock' => ['ComparisonOperator' => 'NULL']]]);
+        $scan = $this->client->getPaginator('Scan', ['TableName' => $this->getTableName(), 'AttributesToGet' => [$this->getHashKey()], 'ScanFilter' => [$this->getSessionLifetimeAttribute() => ['ComparisonOperator' => 'LT', 'AttributeValueList' => [['N' => (string) time()]]], 'lock' => ['ComparisonOperator' => 'NULL']]]);
         // Create a WriteRequestBatch for deleting the expired items
         $batch = new WriteRequestBatch($this->client, $this->getBatchConfig());
         // Perform Scan and BatchWriteItem (delete) operations as needed
@@ -97,7 +97,7 @@ class StandardSessionConnection implements SessionConnectionInterface
      */
     protected function triggerError($error)
     {
-        \trigger_error($error, \E_USER_WARNING);
+        trigger_error($error, \E_USER_WARNING);
         return \false;
     }
 }

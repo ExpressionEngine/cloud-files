@@ -31,7 +31,7 @@ class SetValue implements \JsonSerializable, \Countable, \IteratorAggregate
     #[\ReturnTypeWillChange]
     public function count()
     {
-        return \count($this->values);
+        return count($this->values);
     }
     #[\ReturnTypeWillChange]
     public function getIterator()

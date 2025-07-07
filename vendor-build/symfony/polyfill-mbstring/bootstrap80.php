@@ -11,234 +11,270 @@ namespace ExpressionEngine\Dependency;
  * file that was distributed with this source code.
  */
 use ExpressionEngine\Dependency\Symfony\Polyfill\Mbstring as p;
-if (!\function_exists('mb_convert_encoding')) {
-    function mb_convert_encoding(array|string|null $string, ?string $to_encoding, array|string|null $from_encoding = null) : array|string|false
+if (!\function_exists('mb_convert_encoding') && !\function_exists('ExpressionEngine\Dependency\mb_convert_encoding')) {
+    function mb_convert_encoding(array|string|null $string, ?string $to_encoding, array|string|null $from_encoding = null): array|string|false
     {
         return p\Mbstring::mb_convert_encoding($string ?? '', (string) $to_encoding, $from_encoding);
     }
 }
-if (!\function_exists('mb_decode_mimeheader')) {
-    function mb_decode_mimeheader(?string $string) : string
+if (!\function_exists('mb_decode_mimeheader') && !\function_exists('ExpressionEngine\Dependency\mb_decode_mimeheader')) {
+    function mb_decode_mimeheader(?string $string): string
     {
         return p\Mbstring::mb_decode_mimeheader((string) $string);
     }
 }
-if (!\function_exists('mb_encode_mimeheader')) {
-    function mb_encode_mimeheader(?string $string, ?string $charset = null, ?string $transfer_encoding = null, ?string $newline = "\r\n", ?int $indent = 0) : string
+if (!\function_exists('mb_encode_mimeheader') && !\function_exists('ExpressionEngine\Dependency\mb_encode_mimeheader')) {
+    function mb_encode_mimeheader(?string $string, ?string $charset = null, ?string $transfer_encoding = null, ?string $newline = "\r\n", ?int $indent = 0): string
     {
         return p\Mbstring::mb_encode_mimeheader((string) $string, $charset, $transfer_encoding, (string) $newline, (int) $indent);
     }
 }
-if (!\function_exists('mb_decode_numericentity')) {
-    function mb_decode_numericentity(?string $string, array $map, ?string $encoding = null) : string
+if (!\function_exists('mb_decode_numericentity') && !\function_exists('ExpressionEngine\Dependency\mb_decode_numericentity')) {
+    function mb_decode_numericentity(?string $string, array $map, ?string $encoding = null): string
     {
         return p\Mbstring::mb_decode_numericentity((string) $string, $map, $encoding);
     }
 }
-if (!\function_exists('mb_encode_numericentity')) {
-    function mb_encode_numericentity(?string $string, array $map, ?string $encoding = null, ?bool $hex = \false) : string
+if (!\function_exists('mb_encode_numericentity') && !\function_exists('ExpressionEngine\Dependency\mb_encode_numericentity')) {
+    function mb_encode_numericentity(?string $string, array $map, ?string $encoding = null, ?bool $hex = \false): string
     {
         return p\Mbstring::mb_encode_numericentity((string) $string, $map, $encoding, (bool) $hex);
     }
 }
-if (!\function_exists('mb_convert_case')) {
-    function mb_convert_case(?string $string, ?int $mode, ?string $encoding = null) : string
+if (!\function_exists('mb_convert_case') && !\function_exists('ExpressionEngine\Dependency\mb_convert_case')) {
+    function mb_convert_case(?string $string, ?int $mode, ?string $encoding = null): string
     {
         return p\Mbstring::mb_convert_case((string) $string, (int) $mode, $encoding);
     }
 }
-if (!\function_exists('mb_internal_encoding')) {
-    function mb_internal_encoding(?string $encoding = null) : string|bool
+if (!\function_exists('mb_internal_encoding') && !\function_exists('ExpressionEngine\Dependency\mb_internal_encoding')) {
+    function mb_internal_encoding(?string $encoding = null): string|bool
     {
         return p\Mbstring::mb_internal_encoding($encoding);
     }
 }
-if (!\function_exists('mb_language')) {
-    function mb_language(?string $language = null) : string|bool
+if (!\function_exists('mb_language') && !\function_exists('ExpressionEngine\Dependency\mb_language')) {
+    function mb_language(?string $language = null): string|bool
     {
         return p\Mbstring::mb_language($language);
     }
 }
-if (!\function_exists('mb_list_encodings')) {
-    function mb_list_encodings() : array
+if (!\function_exists('mb_list_encodings') && !\function_exists('ExpressionEngine\Dependency\mb_list_encodings')) {
+    function mb_list_encodings(): array
     {
         return p\Mbstring::mb_list_encodings();
     }
 }
-if (!\function_exists('mb_encoding_aliases')) {
-    function mb_encoding_aliases(?string $encoding) : array
+if (!\function_exists('mb_encoding_aliases') && !\function_exists('ExpressionEngine\Dependency\mb_encoding_aliases')) {
+    function mb_encoding_aliases(?string $encoding): array
     {
         return p\Mbstring::mb_encoding_aliases((string) $encoding);
     }
 }
-if (!\function_exists('mb_check_encoding')) {
-    function mb_check_encoding(array|string|null $value = null, ?string $encoding = null) : bool
+if (!\function_exists('mb_check_encoding') && !\function_exists('ExpressionEngine\Dependency\mb_check_encoding')) {
+    function mb_check_encoding(array|string|null $value = null, ?string $encoding = null): bool
     {
         return p\Mbstring::mb_check_encoding($value, $encoding);
     }
 }
-if (!\function_exists('mb_detect_encoding')) {
-    function mb_detect_encoding(?string $string, array|string|null $encodings = null, ?bool $strict = \false) : string|false
+if (!\function_exists('mb_detect_encoding') && !\function_exists('ExpressionEngine\Dependency\mb_detect_encoding')) {
+    function mb_detect_encoding(?string $string, array|string|null $encodings = null, ?bool $strict = \false): string|false
     {
         return p\Mbstring::mb_detect_encoding((string) $string, $encodings, (bool) $strict);
     }
 }
-if (!\function_exists('mb_detect_order')) {
-    function mb_detect_order(array|string|null $encoding = null) : array|bool
+if (!\function_exists('mb_detect_order') && !\function_exists('ExpressionEngine\Dependency\mb_detect_order')) {
+    function mb_detect_order(array|string|null $encoding = null): array|bool
     {
         return p\Mbstring::mb_detect_order($encoding);
     }
 }
-if (!\function_exists('mb_parse_str')) {
-    function mb_parse_str(?string $string, &$result = []) : bool
+if (!\function_exists('mb_parse_str') && !\function_exists('ExpressionEngine\Dependency\mb_parse_str')) {
+    function mb_parse_str(?string $string, &$result = []): bool
     {
         \parse_str((string) $string, $result);
         return (bool) $result;
     }
 }
-if (!\function_exists('mb_strlen')) {
-    function mb_strlen(?string $string, ?string $encoding = null) : int
+if (!\function_exists('mb_strlen') && !\function_exists('ExpressionEngine\Dependency\mb_strlen')) {
+    function mb_strlen(?string $string, ?string $encoding = null): int
     {
         return p\Mbstring::mb_strlen((string) $string, $encoding);
     }
 }
-if (!\function_exists('mb_strpos')) {
-    function mb_strpos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null) : int|false
+if (!\function_exists('mb_strpos') && !\function_exists('ExpressionEngine\Dependency\mb_strpos')) {
+    function mb_strpos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null): int|false
     {
         return p\Mbstring::mb_strpos((string) $haystack, (string) $needle, (int) $offset, $encoding);
     }
 }
-if (!\function_exists('mb_strtolower')) {
-    function mb_strtolower(?string $string, ?string $encoding = null) : string
+if (!\function_exists('mb_strtolower') && !\function_exists('ExpressionEngine\Dependency\mb_strtolower')) {
+    function mb_strtolower(?string $string, ?string $encoding = null): string
     {
         return p\Mbstring::mb_strtolower((string) $string, $encoding);
     }
 }
-if (!\function_exists('mb_strtoupper')) {
-    function mb_strtoupper(?string $string, ?string $encoding = null) : string
+if (!\function_exists('mb_strtoupper') && !\function_exists('ExpressionEngine\Dependency\mb_strtoupper')) {
+    function mb_strtoupper(?string $string, ?string $encoding = null): string
     {
         return p\Mbstring::mb_strtoupper((string) $string, $encoding);
     }
 }
-if (!\function_exists('mb_substitute_character')) {
-    function mb_substitute_character(string|int|null $substitute_character = null) : string|int|bool
+if (!\function_exists('mb_substitute_character') && !\function_exists('ExpressionEngine\Dependency\mb_substitute_character')) {
+    function mb_substitute_character(string|int|null $substitute_character = null): string|int|bool
     {
         return p\Mbstring::mb_substitute_character($substitute_character);
     }
 }
-if (!\function_exists('mb_substr')) {
-    function mb_substr(?string $string, ?int $start, ?int $length = null, ?string $encoding = null) : string
+if (!\function_exists('mb_substr') && !\function_exists('ExpressionEngine\Dependency\mb_substr')) {
+    function mb_substr(?string $string, ?int $start, ?int $length = null, ?string $encoding = null): string
     {
         return p\Mbstring::mb_substr((string) $string, (int) $start, $length, $encoding);
     }
 }
-if (!\function_exists('mb_stripos')) {
-    function mb_stripos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null) : int|false
+if (!\function_exists('mb_stripos') && !\function_exists('ExpressionEngine\Dependency\mb_stripos')) {
+    function mb_stripos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null): int|false
     {
         return p\Mbstring::mb_stripos((string) $haystack, (string) $needle, (int) $offset, $encoding);
     }
 }
-if (!\function_exists('mb_stristr')) {
-    function mb_stristr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null) : string|false
+if (!\function_exists('mb_stristr') && !\function_exists('ExpressionEngine\Dependency\mb_stristr')) {
+    function mb_stristr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null): string|false
     {
         return p\Mbstring::mb_stristr((string) $haystack, (string) $needle, (bool) $before_needle, $encoding);
     }
 }
-if (!\function_exists('mb_strrchr')) {
-    function mb_strrchr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null) : string|false
+if (!\function_exists('mb_strrchr') && !\function_exists('ExpressionEngine\Dependency\mb_strrchr')) {
+    function mb_strrchr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null): string|false
     {
         return p\Mbstring::mb_strrchr((string) $haystack, (string) $needle, (bool) $before_needle, $encoding);
     }
 }
-if (!\function_exists('mb_strrichr')) {
-    function mb_strrichr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null) : string|false
+if (!\function_exists('mb_strrichr') && !\function_exists('ExpressionEngine\Dependency\mb_strrichr')) {
+    function mb_strrichr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null): string|false
     {
         return p\Mbstring::mb_strrichr((string) $haystack, (string) $needle, (bool) $before_needle, $encoding);
     }
 }
-if (!\function_exists('mb_strripos')) {
-    function mb_strripos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null) : int|false
+if (!\function_exists('mb_strripos') && !\function_exists('ExpressionEngine\Dependency\mb_strripos')) {
+    function mb_strripos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null): int|false
     {
         return p\Mbstring::mb_strripos((string) $haystack, (string) $needle, (int) $offset, $encoding);
     }
 }
-if (!\function_exists('mb_strrpos')) {
-    function mb_strrpos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null) : int|false
+if (!\function_exists('mb_strrpos') && !\function_exists('ExpressionEngine\Dependency\mb_strrpos')) {
+    function mb_strrpos(?string $haystack, ?string $needle, ?int $offset = 0, ?string $encoding = null): int|false
     {
         return p\Mbstring::mb_strrpos((string) $haystack, (string) $needle, (int) $offset, $encoding);
     }
 }
-if (!\function_exists('mb_strstr')) {
-    function mb_strstr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null) : string|false
+if (!\function_exists('mb_strstr') && !\function_exists('ExpressionEngine\Dependency\mb_strstr')) {
+    function mb_strstr(?string $haystack, ?string $needle, ?bool $before_needle = \false, ?string $encoding = null): string|false
     {
         return p\Mbstring::mb_strstr((string) $haystack, (string) $needle, (bool) $before_needle, $encoding);
     }
 }
-if (!\function_exists('mb_get_info')) {
-    function mb_get_info(?string $type = 'all') : array|string|int|false
+if (!\function_exists('mb_get_info') && !\function_exists('ExpressionEngine\Dependency\mb_get_info')) {
+    function mb_get_info(?string $type = 'all'): array|string|int|false|null
     {
         return p\Mbstring::mb_get_info((string) $type);
     }
 }
-if (!\function_exists('mb_http_output')) {
-    function mb_http_output(?string $encoding = null) : string|bool
+if (!\function_exists('mb_http_output') && !\function_exists('ExpressionEngine\Dependency\mb_http_output')) {
+    function mb_http_output(?string $encoding = null): string|bool
     {
         return p\Mbstring::mb_http_output($encoding);
     }
 }
-if (!\function_exists('mb_strwidth')) {
-    function mb_strwidth(?string $string, ?string $encoding = null) : int
+if (!\function_exists('mb_strwidth') && !\function_exists('ExpressionEngine\Dependency\mb_strwidth')) {
+    function mb_strwidth(?string $string, ?string $encoding = null): int
     {
         return p\Mbstring::mb_strwidth((string) $string, $encoding);
     }
 }
-if (!\function_exists('mb_substr_count')) {
-    function mb_substr_count(?string $haystack, ?string $needle, ?string $encoding = null) : int
+if (!\function_exists('mb_substr_count') && !\function_exists('ExpressionEngine\Dependency\mb_substr_count')) {
+    function mb_substr_count(?string $haystack, ?string $needle, ?string $encoding = null): int
     {
         return p\Mbstring::mb_substr_count((string) $haystack, (string) $needle, $encoding);
     }
 }
-if (!\function_exists('mb_output_handler')) {
-    function mb_output_handler(?string $string, ?int $status) : string
+if (!\function_exists('mb_output_handler') && !\function_exists('ExpressionEngine\Dependency\mb_output_handler')) {
+    function mb_output_handler(?string $string, ?int $status): string
     {
         return p\Mbstring::mb_output_handler((string) $string, (int) $status);
     }
 }
-if (!\function_exists('mb_http_input')) {
-    function mb_http_input(?string $type = null) : array|string|false
+if (!\function_exists('mb_http_input') && !\function_exists('ExpressionEngine\Dependency\mb_http_input')) {
+    function mb_http_input(?string $type = null): array|string|false
     {
         return p\Mbstring::mb_http_input($type);
     }
 }
-if (!\function_exists('mb_convert_variables')) {
-    function mb_convert_variables(?string $to_encoding, array|string|null $from_encoding, mixed &$var, mixed &...$vars) : string|false
+if (!\function_exists('mb_convert_variables') && !\function_exists('ExpressionEngine\Dependency\mb_convert_variables')) {
+    function mb_convert_variables(?string $to_encoding, array|string|null $from_encoding, mixed &$var, mixed &...$vars): string|false
     {
         return p\Mbstring::mb_convert_variables((string) $to_encoding, $from_encoding ?? '', $var, ...$vars);
     }
 }
-if (!\function_exists('mb_ord')) {
-    function mb_ord(?string $string, ?string $encoding = null) : int|false
+if (!\function_exists('mb_ord') && !\function_exists('ExpressionEngine\Dependency\mb_ord')) {
+    function mb_ord(?string $string, ?string $encoding = null): int|false
     {
         return p\Mbstring::mb_ord((string) $string, $encoding);
     }
 }
-if (!\function_exists('mb_chr')) {
-    function mb_chr(?int $codepoint, ?string $encoding = null) : string|false
+if (!\function_exists('mb_chr') && !\function_exists('ExpressionEngine\Dependency\mb_chr')) {
+    function mb_chr(?int $codepoint, ?string $encoding = null): string|false
     {
         return p\Mbstring::mb_chr((int) $codepoint, $encoding);
     }
 }
-if (!\function_exists('mb_scrub')) {
-    function mb_scrub(?string $string, ?string $encoding = null) : string
+if (!\function_exists('mb_scrub') && !\function_exists('ExpressionEngine\Dependency\mb_scrub')) {
+    function mb_scrub(?string $string, ?string $encoding = null): string
     {
         $encoding ??= \mb_internal_encoding();
         return \mb_convert_encoding((string) $string, $encoding, $encoding);
     }
 }
-if (!\function_exists('mb_str_split')) {
-    function mb_str_split(?string $string, ?int $length = 1, ?string $encoding = null) : array
+if (!\function_exists('mb_str_split') && !\function_exists('ExpressionEngine\Dependency\mb_str_split')) {
+    function mb_str_split(?string $string, ?int $length = 1, ?string $encoding = null): array
     {
         return p\Mbstring::mb_str_split((string) $string, (int) $length, $encoding);
+    }
+}
+if (!\function_exists('mb_str_pad') && !\function_exists('ExpressionEngine\Dependency\mb_str_pad')) {
+    function mb_str_pad(string $string, int $length, string $pad_string = ' ', int $pad_type = \STR_PAD_RIGHT, ?string $encoding = null): string
+    {
+        return p\Mbstring::mb_str_pad($string, $length, $pad_string, $pad_type, $encoding);
+    }
+}
+if (!\function_exists('mb_ucfirst') && !\function_exists('ExpressionEngine\Dependency\mb_ucfirst')) {
+    function mb_ucfirst(string $string, ?string $encoding = null): string
+    {
+        return p\Mbstring::mb_ucfirst($string, $encoding);
+    }
+}
+if (!\function_exists('mb_lcfirst') && !\function_exists('ExpressionEngine\Dependency\mb_lcfirst')) {
+    function mb_lcfirst(string $string, ?string $encoding = null): string
+    {
+        return p\Mbstring::mb_lcfirst($string, $encoding);
+    }
+}
+if (!\function_exists('mb_trim') && !\function_exists('ExpressionEngine\Dependency\mb_trim')) {
+    function mb_trim(string $string, ?string $characters = null, ?string $encoding = null): string
+    {
+        return p\Mbstring::mb_trim($string, $characters, $encoding);
+    }
+}
+if (!\function_exists('mb_ltrim') && !\function_exists('ExpressionEngine\Dependency\mb_ltrim')) {
+    function mb_ltrim(string $string, ?string $characters = null, ?string $encoding = null): string
+    {
+        return p\Mbstring::mb_ltrim($string, $characters, $encoding);
+    }
+}
+if (!\function_exists('mb_rtrim') && !\function_exists('ExpressionEngine\Dependency\mb_rtrim')) {
+    function mb_rtrim(string $string, ?string $characters = null, ?string $encoding = null): string
+    {
+        return p\Mbstring::mb_rtrim($string, $characters, $encoding);
     }
 }
 if (\extension_loaded('mbstring')) {

@@ -12,7 +12,7 @@ use ExpressionEngine\Dependency\Psr\Http\Message\UriInterface;
  */
 class S3UriParser
 {
-    private $pattern = '/^(.+\\.)?s3[.-]([A-Za-z0-9-]+)\\./';
+    private $pattern = '/^(.+\.)?s3[.-]([A-Za-z0-9-]+)\./';
     private $streamWrapperScheme = 's3';
     private static $defaultResult = ['path_style' => \true, 'bucket' => null, 'key' => null, 'region' => null];
     /**
@@ -46,7 +46,7 @@ class S3UriParser
         if (!$url->getHost()) {
             throw new \InvalidArgumentException('No hostname found in URI: ' . $uri);
         }
-        if (!\preg_match($this->pattern, $url->getHost(), $matches)) {
+        if (!preg_match($this->pattern, $url->getHost(), $matches)) {
             return $this->parseCustomEndpoint($url);
         }
         // Parse the URI based on the matched format (path / virtual)
@@ -57,7 +57,7 @@ class S3UriParser
     }
     private function parseS3UrlComponents($uri)
     {
-        \preg_match("/^([a-zA-Z0-9]*):\\/\\/([a-zA-Z0-9:-]*)\\/(.*)/", $uri, $components);
+        preg_match("/^([a-zA-Z0-9]*):\\/\\/([a-zA-Z0-9:-]*)\\/(.*)/", $uri, $components);
         if (empty($components)) {
             return [];
         }
@@ -69,7 +69,7 @@ class S3UriParser
         $result['path_style'] = \false;
         $result['bucket'] = $url->getHost();
         if ($url->getPath()) {
-            $key = \ltrim($url->getPath(), '/ ');
+            $key = ltrim($url->getPath(), '/ ');
             if (!empty($key)) {
                 $result['key'] = $key;
             }
@@ -79,8 +79,8 @@ class S3UriParser
     private function parseCustomEndpoint(UriInterface $url)
     {
         $result = self::$defaultResult;
-        $path = \ltrim($url->getPath(), '/ ');
-        $segments = \explode('/', $path, 2);
+        $path = ltrim($url->getPath(), '/ ');
+        $segments = explode('/', $path, 2);
         if (isset($segments[0])) {
             $result['bucket'] = $segments[0];
             if (isset($segments[1])) {
@@ -93,19 +93,19 @@ class S3UriParser
     {
         $result = self::$defaultResult;
         if ($url->getPath() != '/') {
-            $path = \ltrim($url->getPath(), '/');
+            $path = ltrim($url->getPath(), '/');
             if ($path) {
-                $pathPos = \strpos($path, '/');
+                $pathPos = strpos($path, '/');
                 if ($pathPos === \false) {
                     // https://s3.amazonaws.com/bucket
                     $result['bucket'] = $path;
-                } elseif ($pathPos == \strlen($path) - 1) {
+                } elseif ($pathPos == strlen($path) - 1) {
                     // https://s3.amazonaws.com/bucket/
-                    $result['bucket'] = \substr($path, 0, -1);
+                    $result['bucket'] = substr($path, 0, -1);
                 } else {
                     // https://s3.amazonaws.com/bucket/key
-                    $result['bucket'] = \substr($path, 0, $pathPos);
-                    $result['key'] = \substr($path, $pathPos + 1) ?: null;
+                    $result['bucket'] = substr($path, 0, $pathPos);
+                    $result['key'] = substr($path, $pathPos + 1) ?: null;
                 }
             }
         }
@@ -116,10 +116,10 @@ class S3UriParser
         $result = self::$defaultResult;
         $result['path_style'] = \false;
         // Remove trailing "." from the prefix to get the bucket
-        $result['bucket'] = \substr($matches[1], 0, -1);
+        $result['bucket'] = substr($matches[1], 0, -1);
         $path = $url->getPath();
         // Check if a key was present, and if so, removing the leading "/"
-        $result['key'] = !$path || $path == '/' ? null : \substr($path, 1);
+        $result['key'] = !$path || $path == '/' ? null : substr($path, 1);
         return $result;
     }
 }

@@ -82,7 +82,7 @@ class MachineLearningClient extends AwsClient
     private function predictEndpoint()
     {
         return static function (callable $handler) {
-            return function (CommandInterface $command, RequestInterface $request = null) use($handler) {
+            return function (CommandInterface $command, ?RequestInterface $request = null) use ($handler) {
                 if ($command->getName() === 'Predict') {
                     $request = $request->withUri(new Uri($command['PredictEndpoint']));
                 }

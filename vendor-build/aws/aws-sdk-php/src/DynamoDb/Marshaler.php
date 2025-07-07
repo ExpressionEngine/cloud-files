@@ -84,11 +84,11 @@ class Marshaler
      */
     public function marshalJson($json)
     {
-        $data = \json_decode($json);
+        $data = json_decode($json);
         if (!$data instanceof \stdClass) {
             throw new \InvalidArgumentException('The JSON document must be valid and be an object at its root.');
         }
-        return \current($this->marshalValue($data));
+        return current($this->marshalValue($data));
     }
     /**
      * Marshal a native PHP array of data to a DynamoDB item.
@@ -102,7 +102,7 @@ class Marshaler
      */
     public function marshalItem($item)
     {
-        return \current($this->marshalValue($item));
+        return current($this->marshalValue($item));
     }
     /**
      * Marshal a native PHP value into a DynamoDB attribute value.
@@ -117,7 +117,7 @@ class Marshaler
      */
     public function marshalValue($value)
     {
-        $type = \gettype($value);
+        $type = gettype($value);
         // Handle string values.
         if ($type === 'string') {
             return ['S' => $value];
@@ -136,22 +136,22 @@ class Marshaler
         }
         // Handle set values.
         if ($value instanceof SetValue) {
-            if (\count($value) === 0) {
+            if (count($value) === 0) {
                 return $this->handleInvalid('empty sets are invalid');
             }
             $previousType = null;
             $data = [];
             foreach ($value as $v) {
                 $marshaled = $this->marshalValue($v);
-                $setType = \key($marshaled);
+                $setType = key($marshaled);
                 if (!$previousType) {
                     $previousType = $setType;
                 } elseif ($setType !== $previousType) {
                     return $this->handleInvalid('sets must be uniform in type');
                 }
-                $data[] = \current($marshaled);
+                $data[] = current($marshaled);
             }
-            return [$previousType . 'S' => \array_values(\array_unique($data))];
+            return [$previousType . 'S' => array_values(array_unique($data))];
         }
         // Handle list and map values.
         $dbType = 'L';
@@ -165,7 +165,7 @@ class Marshaler
             foreach ($value as $k => $v) {
                 if ($v = $this->marshalValue($v)) {
                     $data[$k] = $v;
-                    if ($dbType === 'L' && (!\is_int($k) || $k != $index++)) {
+                    if ($dbType === 'L' && (!is_int($k) || $k != $index++)) {
                         $dbType = 'M';
                     }
                 }
@@ -173,7 +173,7 @@ class Marshaler
             return [$dbType => $data];
         }
         // Handle binary values.
-        if (\is_resource($value) || $value instanceof StreamInterface) {
+        if (is_resource($value) || $value instanceof StreamInterface) {
             $value = $this->binary($value);
         }
         if ($value instanceof BinaryValue) {
@@ -193,7 +193,7 @@ class Marshaler
      */
     public function unmarshalJson(array $data, $jsonEncodeFlags = 0)
     {
-        return \json_encode($this->unmarshalValue(['M' => $data], \true), $jsonEncodeFlags);
+        return json_encode($this->unmarshalValue(['M' => $data], \true), $jsonEncodeFlags);
     }
     /**
      * Unmarshal an item from a DynamoDB operation result into a native PHP
@@ -222,7 +222,7 @@ class Marshaler
      */
     public function unmarshalValue(array $value, $mapAsObject = \false)
     {
-        $type = \key($value);
+        $type = key($value);
         $value = $value[$type];
         switch ($type) {
             case 'S':

@@ -20,7 +20,7 @@ final class CRT
     private static $refcount = 0;
     function __construct()
     {
-        if (\is_null(self::$impl)) {
+        if (is_null(self::$impl)) {
             try {
                 self::$impl = new Extension();
             } catch (RuntimeException $rex) {
@@ -40,7 +40,7 @@ final class CRT
      */
     public static function isLoaded()
     {
-        return !\is_null(self::$impl);
+        return !is_null(self::$impl);
     }
     /**
      * @return bool whether or not the CRT is available via one of the possible backends

@@ -52,7 +52,7 @@ class ObjectUploader implements PromisorInterface
     /**
      * @return PromiseInterface
      */
-    public function promise()
+    public function promise(): PromiseInterface
     {
         /** @var int $mup_threshold */
         $mup_threshold = $this->options['mup_threshold'];
@@ -62,7 +62,7 @@ class ObjectUploader implements PromisorInterface
         }
         // Perform a regular PutObject operation.
         $command = $this->client->getCommand('PutObject', ['Bucket' => $this->bucket, 'Key' => $this->key, 'Body' => $this->body, 'ACL' => $this->acl, 'AddContentMD5' => $this->addContentMD5] + $this->options['params']);
-        if (\is_callable($this->options['before_upload'])) {
+        if (is_callable($this->options['before_upload'])) {
             $this->options['before_upload']($command);
         }
         return $this->client->executeAsync($command);

@@ -62,10 +62,10 @@ class BatchDelete implements PromisorInterface
     {
         $iter = $client->getPaginator('ListObjects', $listObjectsParams);
         $bucket = $listObjectsParams['Bucket'];
-        $fn = function (BatchDelete $that) use($iter) {
-            return $iter->each(function ($result) use($that) {
+        $fn = function (BatchDelete $that) use ($iter) {
+            return $iter->each(function ($result) use ($that) {
                 $promises = [];
-                if (\is_array($result['Contents'])) {
+                if (is_array($result['Contents'])) {
                     foreach ($result['Contents'] as $object) {
                         if ($promise = $that->enqueue($object)) {
                             $promises[] = $promise;
@@ -89,11 +89,11 @@ class BatchDelete implements PromisorInterface
      */
     public static function fromIterator(AwsClientInterface $client, $bucket, \Iterator $iter, array $options = [])
     {
-        $fn = function (BatchDelete $that) use($iter) {
-            return Promise\Coroutine::of(function () use($that, $iter) {
+        $fn = function (BatchDelete $that) use ($iter) {
+            return Promise\Coroutine::of(function () use ($that, $iter) {
                 foreach ($iter as $obj) {
                     if ($promise = $that->enqueue($obj)) {
-                        (yield $promise);
+                        yield $promise;
                     }
                 }
             });
@@ -103,7 +103,7 @@ class BatchDelete implements PromisorInterface
     /**
      * @return PromiseInterface
      */
-    public function promise()
+    public function promise(): PromiseInterface
     {
         if (!$this->cachedPromise) {
             $this->cachedPromise = $this->createPromise();
@@ -133,7 +133,7 @@ class BatchDelete implements PromisorInterface
         $this->bucket = $bucket;
         $this->promiseCreator = $promiseFn;
         if (isset($options['before'])) {
-            if (!\is_callable($options['before'])) {
+            if (!is_callable($options['before'])) {
                 throw new \InvalidArgumentException('before must be callable');
             }
             $this->before = $options['before'];
@@ -142,27 +142,27 @@ class BatchDelete implements PromisorInterface
             if ($options['batch_size'] <= 0) {
                 throw new \InvalidArgumentException('batch_size is not > 0');
             }
-            $this->batchSize = \min($options['batch_size'], 1000);
+            $this->batchSize = min($options['batch_size'], 1000);
         }
     }
     private function enqueue(array $obj)
     {
         $this->queue[] = $obj;
-        return \count($this->queue) >= $this->batchSize ? $this->flushQueue() : null;
+        return count($this->queue) >= $this->batchSize ? $this->flushQueue() : null;
     }
     private function flushQueue()
     {
         static $validKeys = ['Key' => \true, 'VersionId' => \true];
-        if (\count($this->queue) === 0) {
+        if (count($this->queue) === 0) {
             return null;
         }
         $batch = [];
-        while ($obj = \array_shift($this->queue)) {
-            $batch[] = \array_intersect_key($obj, $validKeys);
+        while ($obj = array_shift($this->queue)) {
+            $batch[] = array_intersect_key($obj, $validKeys);
         }
         $command = $this->client->getCommand('DeleteObjects', ['Bucket' => $this->bucket, 'Delete' => ['Objects' => $batch]]);
         if ($this->before) {
-            \call_user_func($this->before, $command);
+            call_user_func($this->before, $command);
         }
         return $this->client->executeAsync($command)->then(function ($result) {
             if (!empty($result['Errors'])) {
@@ -179,16 +179,16 @@ class BatchDelete implements PromisorInterface
     private function createPromise()
     {
         // Create the promise
-        $promise = \call_user_func($this->promiseCreator, $this);
+        $promise = call_user_func($this->promiseCreator, $this);
         $this->promiseCreator = null;
         // Cleans up the promise state and references.
         $cleanup = function () {
             $this->before = $this->client = $this->queue = null;
         };
         // When done, ensure cleanup and that any remaining are processed.
-        return $promise->then(function () use($cleanup) {
+        return $promise->then(function () use ($cleanup) {
             return Promise\Create::promiseFor($this->flushQueue())->then($cleanup);
-        }, function ($reason) use($cleanup) {
+        }, function ($reason) use ($cleanup) {
             $cleanup();
             return Promise\Create::rejectionFor($reason);
         });

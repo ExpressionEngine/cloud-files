@@ -2,12 +2,13 @@
 
 namespace ExpressionEngine\Dependency\Aws\Token;
 
+use ExpressionEngine\Dependency\Aws\Identity\BearerTokenIdentity;
 use ExpressionEngine\Dependency\Aws\Token\TokenInterface;
 /**
  * Basic implementation of the AWS Token interface that allows callers to
  * pass in an AWS token in the constructor.
  */
-class Token implements TokenInterface, \Serializable
+class Token extends BearerTokenIdentity implements TokenInterface, \Serializable
 {
     protected $token;
     protected $expires;
@@ -51,7 +52,7 @@ class Token implements TokenInterface, \Serializable
      */
     public function isExpired()
     {
-        return $this->expires !== null && \time() >= $this->expires;
+        return $this->expires !== null && time() >= $this->expires;
     }
     /**
      * @return array
@@ -65,14 +66,14 @@ class Token implements TokenInterface, \Serializable
      */
     public function serialize()
     {
-        return \json_encode($this->__serialize());
+        return json_encode($this->__serialize());
     }
     /**
      * Sets the state of the object from serialized json data
      */
     public function unserialize($serialized)
     {
-        $data = \json_decode($serialized, \true);
+        $data = json_decode($serialized, \true);
         $this->__unserialize($data);
     }
     /**

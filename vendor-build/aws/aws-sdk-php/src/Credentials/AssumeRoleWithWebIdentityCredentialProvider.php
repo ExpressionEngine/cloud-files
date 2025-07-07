@@ -29,12 +29,16 @@ class AssumeRoleWithWebIdentityCredentialProvider
     private $authenticationAttempts;
     /** @var integer */
     private $tokenFileReadAttempts;
+    /** @var string */
+    private $source;
     /**
      * The constructor attempts to load config from environment variables.
      * If not set, the following config options are used:
      *  - WebIdentityTokenFile: full path of token filename
      *  - RoleArn: arn of role to be assumed
      *  - SessionName: (optional) set by SDK if not provided
+     *  - source: To identify if the provider was sourced by a profile or
+     *    from environment definition. Default will be `sts_web_id_token`.
      *
      * @param array $config Configuration options
      * @throws \InvalidArgumentException
@@ -49,19 +53,20 @@ class AssumeRoleWithWebIdentityCredentialProvider
             throw new \InvalidArgumentException(self::ERROR_MSG . "'WebIdentityTokenFile'.");
         }
         $this->tokenFile = $config['WebIdentityTokenFile'];
-        if (!\preg_match("/^\\w\\:|^\\/|^\\\\/", $this->tokenFile)) {
+        if (!preg_match("/^\\w\\:|^\\/|^\\\\/", $this->tokenFile)) {
             throw new \InvalidArgumentException("'WebIdentityTokenFile' must be an absolute path.");
         }
-        $this->retries = (int) \getenv(self::ENV_RETRIES) ?: (isset($config['retries']) ? $config['retries'] : 3);
+        $this->retries = (int) getenv(self::ENV_RETRIES) ?: (isset($config['retries']) ? $config['retries'] : 3);
         $this->authenticationAttempts = 0;
         $this->tokenFileReadAttempts = 0;
-        $this->session = isset($config['SessionName']) ? $config['SessionName'] : 'aws-sdk-php-' . \round(\microtime(\true) * 1000);
-        $region = isset($config['region']) ? $config['region'] : 'us-east-1';
+        $this->session = $config['SessionName'] ?? 'aws-sdk-php-' . round(microtime(\true) * 1000);
+        $region = $config['region'] ?? 'us-east-1';
         if (isset($config['client'])) {
             $this->client = $config['client'];
         } else {
             $this->client = new StsClient(['credentials' => \false, 'region' => $region, 'version' => 'latest']);
         }
+        $this->source = $config['source'] ?? CredentialSources::STS_WEB_ID_TOKEN;
     }
     /**
      * Loads assume role with web identity credentials.
@@ -75,19 +80,19 @@ class AssumeRoleWithWebIdentityCredentialProvider
             $result = null;
             while ($result == null) {
                 try {
-                    $token = @\file_get_contents($this->tokenFile);
+                    $token = @file_get_contents($this->tokenFile);
                     if (\false === $token) {
-                        \clearstatcache(\true, \dirname($this->tokenFile) . "/" . \readlink($this->tokenFile));
-                        \clearstatcache(\true, \dirname($this->tokenFile) . "/" . \dirname(\readlink($this->tokenFile)));
-                        \clearstatcache(\true, $this->tokenFile);
-                        if (!@\is_readable($this->tokenFile)) {
+                        clearstatcache(\true, dirname($this->tokenFile) . "/" . readlink($this->tokenFile));
+                        clearstatcache(\true, dirname($this->tokenFile) . "/" . dirname(readlink($this->tokenFile)));
+                        clearstatcache(\true, $this->tokenFile);
+                        if (!@is_readable($this->tokenFile)) {
                             throw new CredentialsException("Unreadable tokenfile at location {$this->tokenFile}");
                         }
-                        $token = @\file_get_contents($this->tokenFile);
+                        $token = @file_get_contents($this->tokenFile);
                     }
                     if (empty($token)) {
                         if ($this->tokenFileReadAttempts < $this->retries) {
-                            \sleep((int) \pow(1.2, $this->tokenFileReadAttempts));
+                            sleep((int) pow(1.2, $this->tokenFileReadAttempts));
                             $this->tokenFileReadAttempts++;
                             continue;
                         }
@@ -102,7 +107,7 @@ class AssumeRoleWithWebIdentityCredentialProvider
                 } catch (AwsException $e) {
                     if ($e->getAwsErrorCode() == 'InvalidIdentityToken') {
                         if ($this->authenticationAttempts < $this->retries) {
-                            \sleep((int) \pow(1.2, $this->authenticationAttempts));
+                            sleep((int) pow(1.2, $this->authenticationAttempts));
                         } else {
                             throw new CredentialsException("InvalidIdentityToken, retries exhausted");
                         }
@@ -114,7 +119,7 @@ class AssumeRoleWithWebIdentityCredentialProvider
                 }
                 $this->authenticationAttempts++;
             }
-            (yield $this->client->createCredentials($result));
+            yield $this->client->createCredentials($result, $this->source);
         });
     }
 }

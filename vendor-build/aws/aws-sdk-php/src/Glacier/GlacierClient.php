@@ -113,7 +113,7 @@ class GlacierClient extends AwsClient
     private function getChecksumsMiddleware()
     {
         return function (callable $handler) {
-            return function (CommandInterface $command, RequestInterface $request = null) use($handler) {
+            return function (CommandInterface $command, ?RequestInterface $request = null) use ($handler) {
                 // Accept "ContentSHA256" with a lowercase "c" to match other Glacier params.
                 if (!$command['ContentSHA256'] && $command['contentSHA256']) {
                     $command['ContentSHA256'] = $command['contentSHA256'];
@@ -128,14 +128,14 @@ class GlacierClient extends AwsClient
                     }
                     // Add a tree hash if not provided.
                     if (!$command['checksum']) {
-                        $body = new HashingStream($body, new TreeHash(), function ($result) use(&$request) {
-                            $request = $request->withHeader('x-amz-sha256-tree-hash', \bin2hex($result));
+                        $body = new HashingStream($body, new TreeHash(), function ($result) use (&$request) {
+                            $request = $request->withHeader('x-amz-sha256-tree-hash', bin2hex($result));
                         });
                     }
                     // Add a linear content hash if not provided.
                     if (!$command['ContentSHA256']) {
-                        $body = new HashingStream($body, new PhpHash('sha256'), function ($result) use($command) {
-                            $command['ContentSHA256'] = \bin2hex($result);
+                        $body = new HashingStream($body, new PhpHash('sha256'), function ($result) use ($command) {
+                            $command['ContentSHA256'] = bin2hex($result);
                         });
                     }
                     // Read the stream in order to calculate the hashes.
@@ -160,7 +160,7 @@ class GlacierClient extends AwsClient
     private function getApiVersionMiddleware()
     {
         return function (callable $handler) {
-            return function (CommandInterface $command, RequestInterface $request = null) use($handler) {
+            return function (CommandInterface $command, ?RequestInterface $request = null) use ($handler) {
                 return $handler($command, $request->withHeader('x-amz-glacier-version', $this->getApi()->getMetadata('apiVersion')));
             };
         };
@@ -188,13 +188,13 @@ class GlacierClient extends AwsClient
         // Make "accountId" optional for all operations.
         foreach ($api['operations'] as $operation) {
             $inputShape =& $api['shapes'][$operation['input']['shape']];
-            $accountIdIndex = \array_search('accountId', $inputShape['required']);
+            $accountIdIndex = array_search('accountId', $inputShape['required']);
             unset($inputShape['required'][$accountIdIndex]);
         }
         // Add information about the default value for "accountId".
         $optional = '<div class="alert alert-info">The SDK will set this value to "-" by default.</div>';
         foreach ($docs['shapes']['string']['refs'] as $name => &$ref) {
-            if (\strpos($name, 'accountId')) {
+            if (strpos($name, 'accountId')) {
                 $ref .= $optional;
             }
         }

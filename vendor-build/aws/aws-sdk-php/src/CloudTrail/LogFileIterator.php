@@ -129,11 +129,11 @@ class LogFileIterator extends \IteratorIterator
         $parts = ['prefix' => isset($options[self::KEY_PREFIX]) ? $options[self::KEY_PREFIX] : null, 'account' => isset($options[self::ACCOUNT_ID]) ? $options[self::ACCOUNT_ID] : self::PREFIX_WILDCARD, 'region' => isset($options[self::LOG_REGION]) ? $options[self::LOG_REGION] : self::PREFIX_WILDCARD, 'date' => $this->determineDateForPrefix($startDate, $endDate)];
         // Determine the longest key prefix that can be used to retrieve all
         // of the relevant log files.
-        $candidatePrefix = \ltrim(\strtr(self::PREFIX_TEMPLATE, $parts), '/');
+        $candidatePrefix = ltrim(strtr(self::PREFIX_TEMPLATE, $parts), '/');
         $logKeyPrefix = $candidatePrefix;
-        $index = \strpos($candidatePrefix, self::PREFIX_WILDCARD);
+        $index = strpos($candidatePrefix, self::PREFIX_WILDCARD);
         if ($index !== \false) {
-            $logKeyPrefix = \substr($candidatePrefix, 0, $index);
+            $logKeyPrefix = substr($candidatePrefix, 0, $index);
         }
         // Create an iterator that will emit all of the objects matching the
         // key prefix.
@@ -155,11 +155,11 @@ class LogFileIterator extends \IteratorIterator
      */
     private function normalizeDateValue($date)
     {
-        if (\is_string($date)) {
-            $date = \strtotime($date);
+        if (is_string($date)) {
+            $date = strtotime($date);
         } elseif ($date instanceof \DateTimeInterface) {
             $date = $date->format('U');
-        } elseif (!\is_int($date)) {
+        } elseif (!is_int($date)) {
             throw new \InvalidArgumentException('Date values must be a ' . 'string, an int, or a DateTime object.');
         }
         return $date;
@@ -170,20 +170,20 @@ class LogFileIterator extends \IteratorIterator
     private function determineDateForPrefix($startDate, $endDate)
     {
         // The default date value should look like "*/*/*" after joining
-        $dateParts = \array_fill_keys(['Y', 'm', 'd'], self::PREFIX_WILDCARD);
+        $dateParts = array_fill_keys(['Y', 'm', 'd'], self::PREFIX_WILDCARD);
         // Narrow down the date by replacing the WILDCARDs with values if they
         // are the same for the start and end date.
         if ($startDate && $endDate) {
             foreach ($dateParts as $key => &$value) {
-                $candidateValue = \date($key, $startDate);
-                if ($candidateValue === \date($key, $endDate)) {
+                $candidateValue = date($key, $startDate);
+                if ($candidateValue === date($key, $endDate)) {
                     $value = $candidateValue;
                 } else {
                     break;
                 }
             }
         }
-        return \join('/', $dateParts);
+        return join('/', $dateParts);
     }
     /**
      * Applies a regex iterator filter that limits the ListObjects result set
@@ -202,15 +202,15 @@ class LogFileIterator extends \IteratorIterator
         if ($logKeyPrefix !== $candidatePrefix) {
             // Turn the candidate prefix into a regex by trimming and
             // converting WILDCARDs to regex notation.
-            $regex = \rtrim($candidatePrefix, '/' . self::PREFIX_WILDCARD) . '/';
-            $regex = \strtr($regex, [self::PREFIX_WILDCARD => '[^/]+']);
+            $regex = rtrim($candidatePrefix, '/' . self::PREFIX_WILDCARD) . '/';
+            $regex = strtr($regex, [self::PREFIX_WILDCARD => '[^/]+']);
             // After trimming WILDCARDs or the end, if the regex is the same as
             // the prefix, then no regex is needed.
             if ($logKeyPrefix !== $regex) {
                 // Apply a regex filter iterator to remove files that don't
                 // match the provided options.
-                $objectsIterator = new \CallbackFilterIterator($objectsIterator, function ($object) use($regex) {
-                    return \preg_match("#{$regex}#", $object['Key']);
+                $objectsIterator = new \CallbackFilterIterator($objectsIterator, function ($object) use ($regex) {
+                    return preg_match("#{$regex}#", $object['Key']);
                 });
             }
         }
@@ -231,11 +231,11 @@ class LogFileIterator extends \IteratorIterator
         // If either a start or end date was provided, filter out dates that
         // don't match the date range.
         if ($startDate || $endDate) {
-            $fn = function ($object) use($startDate, $endDate) {
-                if (!\preg_match('/[0-9]{8}T[0-9]{4}Z/', $object['Key'], $m)) {
+            $fn = function ($object) use ($startDate, $endDate) {
+                if (!preg_match('/[0-9]{8}T[0-9]{4}Z/', $object['Key'], $m)) {
                     return \false;
                 }
-                $date = \strtotime($m[0]);
+                $date = strtotime($m[0]);
                 return (!$startDate || $date >= $startDate) && (!$endDate || $date <= $endDate);
             };
             $objectsIterator = new \CallbackFilterIterator($objectsIterator, $fn);

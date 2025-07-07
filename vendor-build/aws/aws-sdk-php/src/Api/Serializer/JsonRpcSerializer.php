@@ -4,8 +4,8 @@ namespace ExpressionEngine\Dependency\Aws\Api\Serializer;
 
 use ExpressionEngine\Dependency\Aws\Api\Service;
 use ExpressionEngine\Dependency\Aws\CommandInterface;
-use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointProviderV2;
 use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointV2SerializerTrait;
+use ExpressionEngine\Dependency\Aws\EndpointV2\Ruleset\RulesetEndpoint;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7\Request;
 use ExpressionEngine\Dependency\Psr\Http\Message\RequestInterface;
 /**
@@ -28,7 +28,7 @@ class JsonRpcSerializer
      * @param string   $endpoint      Endpoint to connect to
      * @param JsonBody $jsonFormatter Optional JSON formatter to use
      */
-    public function __construct(Service $api, $endpoint, JsonBody $jsonFormatter = null)
+    public function __construct(Service $api, $endpoint, ?JsonBody $jsonFormatter = null)
     {
         $this->endpoint = $endpoint;
         $this->api = $api;
@@ -45,14 +45,14 @@ class JsonRpcSerializer
      *
      * @return RequestInterface
      */
-    public function __invoke(CommandInterface $command, $endpointProvider = null, $clientArgs = null)
+    public function __invoke(CommandInterface $command, $endpoint = null)
     {
         $operationName = $command->getName();
         $operation = $this->api->getOperation($operationName);
         $commandArgs = $command->toArray();
         $headers = ['X-Amz-Target' => $this->api->getMetadata('targetPrefix') . '.' . $operationName, 'Content-Type' => $this->contentType];
-        if ($endpointProvider instanceof EndpointProviderV2) {
-            $this->setRequestOptions($endpointProvider, $command, $operation, $commandArgs, $clientArgs, $headers);
+        if ($endpoint instanceof RulesetEndpoint) {
+            $this->setEndpointV2RequestOptions($endpoint, $headers);
         }
         return new Request($operation['http']['method'], $this->endpoint, $headers, $this->jsonFormatter->build($operation->getInput(), $commandArgs));
     }

@@ -9,6 +9,8 @@ use ExpressionEngine\Dependency\Aws\AwsClient;
  * @method \GuzzleHttp\Promise\Promise invokeEndpointAsync(array $args = [])
  * @method \Aws\Result invokeEndpointAsync(array $args = [])
  * @method \GuzzleHttp\Promise\Promise invokeEndpointAsyncAsync(array $args = [])
+ * @method \Aws\Result invokeEndpointWithResponseStream(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise invokeEndpointWithResponseStreamAsync(array $args = [])
  */
 class SageMakerRuntimeClient extends AwsClient
 {

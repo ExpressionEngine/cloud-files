@@ -5,5 +5,5 @@ namespace ExpressionEngine\Dependency\League\MimeTypeDetection;
 
 interface ExtensionToMimeTypeMap
 {
-    public function lookupMimeType(string $extension) : ?string;
+    public function lookupMimeType(string $extension): ?string;
 }

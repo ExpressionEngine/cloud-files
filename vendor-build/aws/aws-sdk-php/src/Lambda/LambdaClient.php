@@ -60,6 +60,8 @@ use ExpressionEngine\Dependency\Aws\Middleware;
  * @method \GuzzleHttp\Promise\Promise getFunctionConfigurationAsync(array $args = [])
  * @method \Aws\Result getFunctionEventInvokeConfig(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getFunctionEventInvokeConfigAsync(array $args = [])
+ * @method \Aws\Result getFunctionRecursionConfig(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise getFunctionRecursionConfigAsync(array $args = [])
  * @method \Aws\Result getFunctionUrlConfig(array $args = [])
  * @method \GuzzleHttp\Promise\Promise getFunctionUrlConfigAsync(array $args = [])
  * @method \Aws\Result getLayerVersion(array $args = [])
@@ -114,6 +116,8 @@ use ExpressionEngine\Dependency\Aws\Middleware;
  * @method \GuzzleHttp\Promise\Promise putFunctionConcurrencyAsync(array $args = [])
  * @method \Aws\Result putFunctionEventInvokeConfig(array $args = [])
  * @method \GuzzleHttp\Promise\Promise putFunctionEventInvokeConfigAsync(array $args = [])
+ * @method \Aws\Result putFunctionRecursionConfig(array $args = [])
+ * @method \GuzzleHttp\Promise\Promise putFunctionRecursionConfigAsync(array $args = [])
  * @method \Aws\Result putProvisionedConcurrencyConfig(array $args = [])
  * @method \GuzzleHttp\Promise\Promise putProvisionedConcurrencyConfigAsync(array $args = [])
  * @method \Aws\Result putRuntimeManagementConfig(array $args = [])
@@ -150,7 +154,7 @@ class LambdaClient extends AwsClient
     {
         parent::__construct($args);
         $list = $this->getHandlerList();
-        if (\extension_loaded('curl')) {
+        if (extension_loaded('curl')) {
             $list->appendInit($this->getDefaultCurlOptionsMiddleware());
         }
     }

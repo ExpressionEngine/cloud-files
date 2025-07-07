@@ -55,7 +55,7 @@ class S3EndpointMiddleware
      */
     public static function wrap($region, $endpointProvider, array $options)
     {
-        return function (callable $handler) use($region, $endpointProvider, $options) {
+        return function (callable $handler) use ($region, $endpointProvider, $options) {
             return new self($handler, $region, $options, $endpointProvider);
         };
     }
@@ -66,7 +66,7 @@ class S3EndpointMiddleware
         $this->accelerateByDefault = isset($options['accelerate']) ? (bool) $options['accelerate'] : \false;
         $this->region = (string) $region;
         $this->endpoint = isset($options['endpoint']) ? $options['endpoint'] : "";
-        $this->endpointProvider = \is_null($endpointProvider) ? PartitionEndpointProvider::defaultProvider() : $endpointProvider;
+        $this->endpointProvider = is_null($endpointProvider) ? PartitionEndpointProvider::defaultProvider() : $endpointProvider;
         $this->nextHandler = $nextHandler;
     }
     public function __invoke(CommandInterface $command, RequestInterface $request)
@@ -99,7 +99,7 @@ class S3EndpointMiddleware
     }
     private static function isRequestHostStyleCompatible(CommandInterface $command, RequestInterface $request)
     {
-        return S3Client::isBucketDnsCompatible($command['Bucket']) && ($request->getUri()->getScheme() === 'http' || \strpos($command['Bucket'], '.') === \false) && \filter_var($request->getUri()->getHost(), \FILTER_VALIDATE_IP) === \false;
+        return S3Client::isBucketDnsCompatible($command['Bucket']) && ($request->getUri()->getScheme() === 'http' || strpos($command['Bucket'], '.') === \false) && filter_var($request->getUri()->getHost(), \FILTER_VALIDATE_IP) === \false;
     }
     private function endpointPatternDecider(CommandInterface $command, RequestInterface $request)
     {
@@ -177,9 +177,9 @@ class S3EndpointMiddleware
     }
     private function getBucketlessPath($path, CommandInterface $command)
     {
-        $pattern = '/^\\/' . \preg_quote($command['Bucket'], '/') . '/';
-        $path = \preg_replace($pattern, '', $path) ?: '/';
-        if (\substr($path, 0, 1) !== '/') {
+        $pattern = '/^\/' . preg_quote($command['Bucket'], '/') . '/';
+        $path = preg_replace($pattern, '', $path) ?: '/';
+        if (substr($path, 0, 1) !== '/') {
             $path = '/' . $path;
         }
         return $path;

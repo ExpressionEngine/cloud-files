@@ -37,31 +37,29 @@ class ValidateResponseChecksumParser extends AbstractParser
         $checksumModeEnabledMember = isset($checksumInfo['requestValidationModeMember']) ? $checksumInfo['requestValidationModeMember'] : "";
         $checksumModeEnabled = isset($command[$checksumModeEnabledMember]) ? $command[$checksumModeEnabledMember] : "";
         $responseAlgorithms = isset($checksumInfo['responseAlgorithms']) ? $checksumInfo['responseAlgorithms'] : [];
-        if (empty($responseAlgorithms) || \strtolower($checksumModeEnabled) !== "enabled") {
+        if (empty($responseAlgorithms) || strtolower($checksumModeEnabled) !== "enabled") {
             return $result;
         }
-        if (\extension_loaded('awscrt')) {
+        if (extension_loaded('awscrt')) {
             $checksumPriority = ['CRC32C', 'CRC32', 'SHA1', 'SHA256'];
         } else {
             $checksumPriority = ['CRC32', 'SHA1', 'SHA256'];
         }
-        $checksumsToCheck = \array_intersect($responseAlgorithms, $checksumPriority);
+        $checksumsToCheck = array_intersect($responseAlgorithms, $checksumPriority);
         $checksumValidationInfo = $this->validateChecksum($checksumsToCheck, $response);
         if ($checksumValidationInfo['status'] == "SUCCEEDED") {
             $result['ChecksumValidated'] = $checksumValidationInfo['checksum'];
-        } else {
-            if ($checksumValidationInfo['status'] == "FAILED") {
-                //Ignore failed validations on GetObject if it's a multipart get which returned a full multipart object
-                if ($command->getName() == "GetObject" && !empty($checksumValidationInfo['checksumHeaderValue'])) {
-                    $headerValue = $checksumValidationInfo['checksumHeaderValue'];
-                    $lastDashPos = \strrpos($headerValue, '-');
-                    $endOfChecksum = \substr($headerValue, $lastDashPos + 1);
-                    if (\is_numeric($endOfChecksum) && \intval($endOfChecksum) > 1 && \intval($endOfChecksum) < 10000) {
-                        return $result;
-                    }
+        } else if ($checksumValidationInfo['status'] == "FAILED") {
+            //Ignore failed validations on GetObject if it's a multipart get which returned a full multipart object
+            if ($command->getName() == "GetObject" && !empty($checksumValidationInfo['checksumHeaderValue'])) {
+                $headerValue = $checksumValidationInfo['checksumHeaderValue'];
+                $lastDashPos = strrpos($headerValue, '-');
+                $endOfChecksum = substr($headerValue, $lastDashPos + 1);
+                if (is_numeric($endOfChecksum) && intval($endOfChecksum) > 1 && intval($endOfChecksum) < 10000) {
+                    return $result;
                 }
-                throw new S3Exception("Calculated response checksum did not match the expected value", $command);
             }
+            throw new S3Exception("Calculated response checksum did not match the expected value", $command);
         }
         return $result;
     }

@@ -31,7 +31,7 @@ class GuzzleHandler
     /**
      * @param ClientInterface $client
      */
-    public function __construct(ClientInterface $client = null)
+    public function __construct(?ClientInterface $client = null)
     {
         $this->client = $client ?: new Client();
     }
@@ -45,7 +45,7 @@ class GuzzleHandler
     {
         // Create and send a Guzzle 5 request
         $guzzlePromise = $this->client->send($this->createGuzzleRequest($request, $options));
-        $promise = new Promise\Promise(function () use($guzzlePromise) {
+        $promise = new Promise\Promise(function () use ($guzzlePromise) {
             try {
                 $guzzlePromise->wait();
             } catch (\Exception $e) {
@@ -57,14 +57,14 @@ class GuzzleHandler
         return $promise->then(function (GuzzleResponse $response) {
             // Adapt the Guzzle 5 Future to a Guzzle 6 ResponsePromise.
             return $this->createPsr7Response($response);
-        }, function (Exception $exception) use($options) {
+        }, function (Exception $exception) use ($options) {
             // If we got a 'sink' that's a path, set the response body to
             // the contents of the file. This will build the resulting
             // exception with more information.
             if ($exception instanceof RequestException) {
                 if (isset($options['sink'])) {
                     if (!$options['sink'] instanceof Psr7StreamInterface) {
-                        $exception->getResponse()->setBody(Stream::factory(\file_get_contents($options['sink'])));
+                        $exception->getResponse()->setBody(Stream::factory(file_get_contents($options['sink'])));
                     }
                 }
             }
@@ -78,7 +78,7 @@ class GuzzleHandler
         $statsCallback = isset($options['http_stats_receiver']) ? $options['http_stats_receiver'] : null;
         unset($options['http_stats_receiver']);
         // Remove unsupported options.
-        foreach (\array_keys($options) as $key) {
+        foreach (array_keys($options) as $key) {
             if (!isset(self::$validOptions[$key])) {
                 unset($options[$key]);
             }
@@ -97,8 +97,8 @@ class GuzzleHandler
         $options['future'] = 'lazy';
         // Create the Guzzle 5 request from the provided PSR7 request.
         $request = $this->client->createRequest($psrRequest->getMethod(), $psrRequest->getUri(), $options);
-        if (\is_callable($statsCallback)) {
-            $request->getEmitter()->on('end', function (EndEvent $event) use($statsCallback) {
+        if (is_callable($statsCallback)) {
+            $request->getEmitter()->on('end', function (EndEvent $event) use ($statsCallback) {
                 $statsCallback($event->getTransferInfo());
             });
         }

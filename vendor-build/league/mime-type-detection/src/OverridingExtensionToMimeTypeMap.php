@@ -20,7 +20,7 @@ class OverridingExtensionToMimeTypeMap implements ExtensionToMimeTypeMap
         $this->innerMap = $innerMap;
         $this->overrides = $overrides;
     }
-    public function lookupMimeType(string $extension) : ?string
+    public function lookupMimeType(string $extension): ?string
     {
         return $this->overrides[$extension] ?? $this->innerMap->lookupMimeType($extension);
     }

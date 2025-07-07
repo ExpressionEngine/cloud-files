@@ -71,7 +71,7 @@ class ConfigurationProvider extends AbstractConfigurationProvider implements Con
             $configProviders[] = self::ini();
         }
         $configProviders[] = self::fallback();
-        $memo = self::memoize(\call_user_func_array([ConfigurationProvider::class, 'chain'], $configProviders));
+        $memo = self::memoize(call_user_func_array([ConfigurationProvider::class, 'chain'], $configProviders));
         if (isset($config['s3_us_east_1_regional_endpoint']) && $config['s3_us_east_1_regional_endpoint'] instanceof CacheInterface) {
             return self::cache($memo, $config['s3_us_east_1_regional_endpoint'], self::$cacheKey);
         }
@@ -81,7 +81,7 @@ class ConfigurationProvider extends AbstractConfigurationProvider implements Con
     {
         return function () {
             // Use config from environment variables, if available
-            $endpointsType = \getenv(self::ENV_ENDPOINTS_TYPE);
+            $endpointsType = getenv(self::ENV_ENDPOINTS_TYPE);
             if (!empty($endpointsType)) {
                 return Promise\Create::promiseFor(new Configuration($endpointsType));
             }
@@ -103,9 +103,9 @@ class ConfigurationProvider extends AbstractConfigurationProvider implements Con
     public static function ini($profile = null, $filename = null)
     {
         $filename = $filename ?: self::getDefaultConfigFilename();
-        $profile = $profile ?: (\getenv(self::ENV_PROFILE) ?: 'default');
-        return function () use($profile, $filename) {
-            if (!@\is_readable($filename)) {
+        $profile = $profile ?: (getenv(self::ENV_PROFILE) ?: 'default');
+        return function () use ($profile, $filename) {
+            if (!@is_readable($filename)) {
                 return self::reject("Cannot read configuration from {$filename}");
             }
             $data = \ExpressionEngine\Dependency\Aws\parse_ini_file($filename, \true);
@@ -142,7 +142,7 @@ class ConfigurationProvider extends AbstractConfigurationProvider implements Con
      */
     public static function unwrap($config)
     {
-        if (\is_callable($config)) {
+        if (is_callable($config)) {
             $config = $config();
         }
         if ($config instanceof Promise\PromiseInterface) {
@@ -151,10 +151,10 @@ class ConfigurationProvider extends AbstractConfigurationProvider implements Con
         if ($config instanceof ConfigurationInterface) {
             return $config;
         }
-        if (\is_string($config)) {
+        if (is_string($config)) {
             return new Configuration($config);
         }
-        if (\is_array($config) && isset($config['endpoints_type'])) {
+        if (is_array($config) && isset($config['endpoints_type'])) {
             return new Configuration($config['endpoints_type']);
         }
         throw new \InvalidArgumentException('Not a valid S3 regional endpoint ' . 'configuration argument.');

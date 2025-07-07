@@ -18,7 +18,7 @@ use ExpressionEngine\Dependency\GuzzleHttp\Promise\FulfilledPromise;
  */
 function constantly($value)
 {
-    return function () use($value) {
+    return function () use ($value) {
         return $value;
     };
 }
@@ -34,7 +34,7 @@ function filter($iterable, callable $pred)
 {
     foreach ($iterable as $value) {
         if ($pred($value)) {
-            (yield $value);
+            yield $value;
         }
     }
 }
@@ -49,7 +49,7 @@ function filter($iterable, callable $pred)
 function map($iterable, callable $f)
 {
     foreach ($iterable as $value) {
-        (yield $f($value));
+        yield $f($value);
     }
 }
 /**
@@ -66,7 +66,7 @@ function flatmap($iterable, callable $f)
 {
     foreach (map($iterable, $f) as $outer) {
         foreach ($outer as $inner) {
-            (yield $inner);
+            yield $inner;
         }
     }
 }
@@ -83,13 +83,13 @@ function partition($iterable, $size)
     $buffer = [];
     foreach ($iterable as $value) {
         $buffer[] = $value;
-        if (\count($buffer) === $size) {
-            (yield $buffer);
+        if (count($buffer) === $size) {
+            yield $buffer;
             $buffer = [];
         }
     }
     if ($buffer) {
-        (yield $buffer);
+        yield $buffer;
     }
 }
 /**
@@ -107,11 +107,11 @@ function partition($iterable, $size)
  */
 function or_chain()
 {
-    $fns = \func_get_args();
-    return function () use($fns) {
-        $args = \func_get_args();
+    $fns = func_get_args();
+    return function () use ($fns) {
+        $args = func_get_args();
         foreach ($fns as $fn) {
-            $result = $args ? \call_user_func_array($fn, $args) : $fn();
+            $result = $args ? call_user_func_array($fn, $args) : $fn();
             if ($result) {
                 return $result;
             }
@@ -138,17 +138,17 @@ function load_compiled_json($path)
     static $compiledList = [];
     $compiledFilepath = "{$path}.php";
     if (!isset($compiledList[$compiledFilepath])) {
-        if (\is_readable($compiledFilepath)) {
-            $compiledList[$compiledFilepath] = (include $compiledFilepath);
+        if (is_readable($compiledFilepath)) {
+            $compiledList[$compiledFilepath] = include $compiledFilepath;
         }
     }
     if (isset($compiledList[$compiledFilepath])) {
         return $compiledList[$compiledFilepath];
     }
-    if (!\file_exists($path)) {
-        throw new \InvalidArgumentException(\sprintf("File not found: %s", $path));
+    if (!file_exists($path)) {
+        throw new \InvalidArgumentException(sprintf("File not found: %s", $path));
     }
-    return \json_decode(\file_get_contents($path), \true);
+    return json_decode(file_get_contents($path), \true);
 }
 /**
  * No-op
@@ -170,14 +170,14 @@ function clear_compiled_json()
  */
 function dir_iterator($path, $context = null)
 {
-    $dh = $context ? \opendir($path, $context) : \opendir($path);
+    $dh = $context ? opendir($path, $context) : opendir($path);
     if (!$dh) {
         throw new \InvalidArgumentException('File not found: ' . $path);
     }
-    while (($file = \readdir($dh)) !== \false) {
-        (yield $file);
+    while (($file = readdir($dh)) !== \false) {
+        yield $file;
     }
-    \closedir($dh);
+    closedir($dh);
 }
 /**
  * Returns a recursive directory iterator that yields absolute filenames.
@@ -194,27 +194,27 @@ function dir_iterator($path, $context = null)
 function recursive_dir_iterator($path, $context = null)
 {
     $invalid = ['.' => \true, '..' => \true];
-    $pathLen = \strlen($path) + 1;
+    $pathLen = strlen($path) + 1;
     $iterator = dir_iterator($path, $context);
     $queue = [];
     do {
         while ($iterator->valid()) {
             $file = $iterator->current();
             $iterator->next();
-            if (isset($invalid[\basename($file)])) {
+            if (isset($invalid[basename($file)])) {
                 continue;
             }
             $fullPath = "{$path}/{$file}";
-            (yield $fullPath);
-            if (\is_dir($fullPath)) {
+            yield $fullPath;
+            if (is_dir($fullPath)) {
                 $queue[] = $iterator;
-                $iterator = map(dir_iterator($fullPath, $context), function ($file) use($fullPath, $pathLen) {
-                    return \substr("{$fullPath}/{$file}", $pathLen);
+                $iterator = map(dir_iterator($fullPath, $context), function ($file) use ($fullPath, $pathLen) {
+                    return substr("{$fullPath}/{$file}", $pathLen);
                 });
                 continue;
             }
         }
-        $iterator = \array_pop($queue);
+        $iterator = array_pop($queue);
     } while ($iterator);
 }
 //-----------------------------------------------------------------------------
@@ -230,16 +230,16 @@ function recursive_dir_iterator($path, $context = null)
  */
 function describe_type($input)
 {
-    switch (\gettype($input)) {
+    switch (gettype($input)) {
         case 'object':
-            return 'object(' . \get_class($input) . ')';
+            return 'object(' . get_class($input) . ')';
         case 'array':
-            return 'array(' . \count($input) . ')';
+            return 'array(' . count($input) . ')';
         default:
-            \ob_start();
-            \var_dump($input);
+            ob_start();
+            var_dump($input);
             // normalize float vs double
-            return \str_replace('double(', 'float(', \rtrim(\ob_get_clean()));
+            return str_replace('double(', 'float(', rtrim(ob_get_clean()));
     }
 }
 /**
@@ -291,7 +291,7 @@ function guzzle_major_version()
     if (null !== $cache) {
         return $cache;
     }
-    if (\defined('\\ExpressionEngine\\Dependency\\GuzzleHttp\\ClientInterface::VERSION')) {
+    if (defined('ExpressionEngine\Dependency\GuzzleHttp\ClientInterface::VERSION')) {
         $version = (string) ClientInterface::VERSION;
         if ($version[0] === '6') {
             return $cache = 6;
@@ -299,7 +299,7 @@ function guzzle_major_version()
         if ($version[0] === '5') {
             return $cache = 5;
         }
-    } elseif (\defined('\\ExpressionEngine\\Dependency\\GuzzleHttp\\ClientInterface::MAJOR_VERSION')) {
+    } elseif (defined('ExpressionEngine\Dependency\GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
         return $cache = ClientInterface::MAJOR_VERSION;
     }
     throw new \RuntimeException('Unable to determine what Guzzle version is installed.');
@@ -319,11 +319,11 @@ function serialize(CommandInterface $command)
     $request = null;
     $handlerList = $command->getHandlerList();
     // Return a mock result.
-    $handlerList->setHandler(function (CommandInterface $_, RequestInterface $r) use(&$request) {
+    $handlerList->setHandler(function (CommandInterface $_, RequestInterface $r) use (&$request) {
         $request = $r;
         return new FulfilledPromise(new Result([]));
     });
-    \call_user_func($handlerList->resolve(), $command)->wait();
+    call_user_func($handlerList->resolve(), $command)->wait();
     if (!$request instanceof RequestInterface) {
         throw new \RuntimeException('Calling handler did not serialize request');
     }
@@ -349,7 +349,7 @@ function manifest($service = null)
     if (empty($manifest)) {
         $manifest = load_compiled_json(__DIR__ . '/data/manifest.json');
         foreach ($manifest as $endpoint => $info) {
-            $alias = \strtolower($info['namespace']);
+            $alias = strtolower($info['namespace']);
             if ($alias !== $endpoint) {
                 $aliases[$alias] = $endpoint;
             }
@@ -360,7 +360,7 @@ function manifest($service = null)
         return $manifest;
     }
     // Look up the service's info in the manifest data.
-    $service = \strtolower($service);
+    $service = strtolower($service);
     if (isset($manifest[$service])) {
         return $manifest[$service] + ['endpoint' => $service];
     }
@@ -377,7 +377,7 @@ function manifest($service = null)
  */
 function is_valid_hostname($hostname)
 {
-    return \preg_match("/^([a-z\\d](-*[a-z\\d])*)(\\.([a-z\\d](-*[a-z\\d])*))*\\.?\$/i", $hostname) && \preg_match("/^.{1,253}\$/", $hostname) && \preg_match("/^[^\\.]{1,63}(\\.[^\\.]{0,63})*\$/", $hostname);
+    return preg_match("/^([a-z\\d](-*[a-z\\d])*)(\\.([a-z\\d](-*[a-z\\d])*))*\\.?\$/i", $hostname) && preg_match("/^.{1,253}\$/", $hostname) && preg_match("/^[^\\.]{1,63}(\\.[^\\.]{0,63})*\$/", $hostname);
 }
 /**
  * Checks if supplied parameter is a valid host label
@@ -387,7 +387,7 @@ function is_valid_hostname($hostname)
  */
 function is_valid_hostlabel($label)
 {
-    return \preg_match("/^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)\$/", $label);
+    return preg_match("/^(?!-)[a-zA-Z0-9-]{1,63}(?<!-)\$/", $label);
 }
 /**
  * Ignores '#' full line comments, which parse_ini_file no longer does
@@ -400,7 +400,7 @@ function is_valid_hostlabel($label)
  */
 function parse_ini_file($filename, $process_sections = \false, $scanner_mode = \INI_SCANNER_NORMAL)
 {
-    return \parse_ini_string(\preg_replace('/^#.*\\n/m', "", \file_get_contents($filename)), $process_sections, $scanner_mode);
+    return parse_ini_string(preg_replace('/^#.*\n/m', "", file_get_contents($filename)), $process_sections, $scanner_mode);
 }
 /**
  * Outputs boolean value of input for a select range of possible values,
@@ -411,7 +411,7 @@ function parse_ini_file($filename, $process_sections = \false, $scanner_mode = \
  */
 function boolean_value($input)
 {
-    if (\is_bool($input)) {
+    if (is_bool($input)) {
         return $input;
     }
     if ($input === 0) {
@@ -420,8 +420,8 @@ function boolean_value($input)
     if ($input === 1) {
         return \true;
     }
-    if (\is_string($input)) {
-        switch (\strtolower($input)) {
+    if (is_string($input)) {
+        switch (strtolower($input)) {
             case "true":
             case "on":
             case "1":
@@ -437,6 +437,54 @@ function boolean_value($input)
     return null;
 }
 /**
+ * Parses ini sections with subsections (i.e. the service section)
+ *
+ * @param $filename
+ * @param $filename
+ * @return array
+ */
+function parse_ini_section_with_subsections($filename, $section_name)
+{
+    $config = [];
+    $stream = fopen($filename, 'r');
+    if (!$stream) {
+        return $config;
+    }
+    $current_subsection = '';
+    while (!feof($stream)) {
+        $line = trim(fgets($stream));
+        if (empty($line) || in_array($line[0], [';', '#'])) {
+            continue;
+        }
+        if (preg_match('/^\[.*\]$/', $line) && trim($line, '[]') === $section_name) {
+            while (!feof($stream)) {
+                $line = trim(fgets($stream));
+                if (empty($line) || in_array($line[0], [';', '#'])) {
+                    continue;
+                }
+                if (preg_match('/^\[.*\]$/', $line) && trim($line, '[]') === $section_name) {
+                    continue;
+                } elseif (strpos($line, '[') === 0) {
+                    break;
+                }
+                if (strpos($line, ' = ') !== \false) {
+                    list($key, $value) = explode(' = ', $line, 2);
+                    if (empty($current_subsection)) {
+                        $config[$key] = $value;
+                    } else {
+                        $config[$current_subsection][$key] = $value;
+                    }
+                } else {
+                    $current_subsection = trim(str_replace('=', '', $line));
+                    $config[$current_subsection] = [];
+                }
+            }
+        }
+    }
+    fclose($stream);
+    return $config;
+}
+/**
  * Checks if an input is a valid epoch time
  *
  * @param $input
@@ -444,8 +492,8 @@ function boolean_value($input)
  */
 function is_valid_epoch($input)
 {
-    if (\is_string($input) || \is_numeric($input)) {
-        if (\is_string($input) && !\preg_match("/^-?[0-9]+\\.?[0-9]*\$/", $input)) {
+    if (is_string($input) || is_numeric($input)) {
+        if (is_string($input) && !preg_match("/^-?[0-9]+\\.?[0-9]*\$/", $input)) {
             return \false;
         }
         return \true;
@@ -460,7 +508,7 @@ function is_valid_epoch($input)
  */
 function is_fips_pseudo_region($region)
 {
-    return \strpos($region, 'fips-') !== \false || \strpos($region, '-fips') !== \false;
+    return strpos($region, 'fips-') !== \false || strpos($region, '-fips') !== \false;
 }
 /**
  * Returns a region without a fips label
@@ -470,5 +518,22 @@ function is_fips_pseudo_region($region)
  */
 function strip_fips_pseudo_regions($region)
 {
-    return \str_replace(['fips-', '-fips'], ['', ''], $region);
+    return str_replace(['fips-', '-fips'], ['', ''], $region);
+}
+/**
+ * Checks if an array is associative
+ *
+ * @param array $array
+ *
+ * @return bool
+ */
+function is_associative(array $array): bool
+{
+    if (empty($array)) {
+        return \false;
+    }
+    if (function_exists('array_is_list')) {
+        return !array_is_list($array);
+    }
+    return array_keys($array) !== range(0, count($array) - 1);
 }

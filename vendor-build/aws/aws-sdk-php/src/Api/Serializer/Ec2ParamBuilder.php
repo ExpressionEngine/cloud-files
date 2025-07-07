@@ -11,7 +11,7 @@ class Ec2ParamBuilder extends QueryParamBuilder
 {
     protected function queryName(Shape $shape, $default = null)
     {
-        return ($shape['queryName'] ?: \ucfirst(@$shape['locationName'] ?: "")) ?: $default;
+        return ($shape['queryName'] ?: ucfirst(@$shape['locationName'] ?: "")) ?: $default;
     }
     protected function isFlat(Shape $shape)
     {
@@ -20,9 +20,7 @@ class Ec2ParamBuilder extends QueryParamBuilder
     protected function format_list(ListShape $shape, array $value, $prefix, &$query)
     {
         // Handle empty list serialization
-        if (!$value) {
-            $query[$prefix] = \false;
-        } else {
+        if (!empty($value)) {
             $items = $shape->getMember();
             foreach ($value as $k => $v) {
                 $this->format($items, $v, $prefix . '.' . ($k + 1), $query);

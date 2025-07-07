@@ -5,6 +5,7 @@
 ### Added
 
 - Filesystem Adapter for integrating with Backblaze B2 service
+- Support for PHP 8.4
 
 ### Fixed
 

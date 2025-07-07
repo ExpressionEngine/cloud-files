@@ -47,7 +47,7 @@ class PollyClient extends AwsClient
         $uri = $uri->withPath('/v1/speech');
         // Formatting parameters follows rest-json protocol
         $this->formatter = $this->formatter ?: new JsonBody($this->getApi());
-        $queryArray = \json_decode($this->formatter->build($this->getApi()->getOperation('SynthesizeSpeech')->getInput(), $args), \true);
+        $queryArray = json_decode($this->formatter->build($this->getApi()->getOperation('SynthesizeSpeech')->getInput(), $args), \true);
         // Mocking a 'GET' request in pre-signing the Url
         $query = Psr7\Query::build($queryArray);
         $uri = $uri->withQuery($query);

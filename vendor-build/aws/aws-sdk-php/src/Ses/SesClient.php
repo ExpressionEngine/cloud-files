@@ -172,8 +172,8 @@ class SesClient extends \ExpressionEngine\Dependency\Aws\AwsClient
         static $version = "\x02";
         static $algo = 'sha256';
         static $message = 'SendRawEmail';
-        $signature = \hash_hmac($algo, $message, $creds->getSecretKey(), \true);
-        return \base64_encode($version . $signature);
+        $signature = hash_hmac($algo, $message, $creds->getSecretKey(), \true);
+        return base64_encode($version . $signature);
     }
     /**
      * Create an SMTP password for a given IAM user's credentials.
@@ -203,12 +203,12 @@ class SesClient extends \ExpressionEngine\Dependency\Aws\AwsClient
         $signature = self::sign($service, $signature);
         $signature = self::sign($terminal, $signature);
         $signature = self::sign($message, $signature);
-        $signatureAndVersion = \pack('c', $version) . $signature;
-        return \base64_encode($signatureAndVersion);
+        $signatureAndVersion = pack('c', $version) . $signature;
+        return base64_encode($signatureAndVersion);
     }
     private static function sign($key, $message)
     {
-        return \hash_hmac('sha256', $key, $message, \true);
+        return hash_hmac('sha256', $key, $message, \true);
     }
     /**
      * @internal

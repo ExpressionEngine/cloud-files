@@ -34,16 +34,23 @@
     "scripts": {
         "post-install-cmd": [
             "@composer bin all install --ansi",
+            "Aws\\Script\\Composer\\Composer::removeUnusedServices",
             "@prefix-dependencies"
         ],
         "post-update-cmd": [
             "@composer bin all update --ansi",
+            "Aws\\Script\\Composer\\Composer::removeUnusedServices",
             "@prefix-dependencies"
         ],
         "prefix-dependencies": [
             "vendor/bin/php-scoper add-prefix --output-dir=./vendor-build --force --quiet",
             "COMPOSER_VENDOR_DIR=vendor-build composer dump-autoload",
             "php scoper.fix.php"
+        ]
+    },
+    "extra": {
+        "aws/aws-sdk-php": [
+            "S3"
         ]
     }
 }

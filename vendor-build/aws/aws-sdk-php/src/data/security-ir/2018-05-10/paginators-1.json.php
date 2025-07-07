@@ -1,6 +1,0 @@
-<?php
-
-namespace ExpressionEngine\Dependency;
-
-// This file was auto-generated from sdk-root/src/data/security-ir/2018-05-10/paginators-1.json
-return ['pagination' => ['ListCaseEdits' => ['input_token' => 'nextToken', 'output_token' => 'nextToken', 'limit_key' => 'maxResults', 'result_key' => 'items'], 'ListCases' => ['input_token' => 'nextToken', 'output_token' => 'nextToken', 'limit_key' => 'maxResults', 'result_key' => 'items'], 'ListComments' => ['input_token' => 'nextToken', 'output_token' => 'nextToken', 'limit_key' => 'maxResults', 'result_key' => 'items'], 'ListMemberships' => ['input_token' => 'nextToken', 'output_token' => 'nextToken', 'limit_key' => 'maxResults', 'result_key' => 'items']]];

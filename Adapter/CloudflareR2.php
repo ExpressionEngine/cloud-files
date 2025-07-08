@@ -3,7 +3,6 @@
 namespace CloudFiles\Adapter;
 
 use ExpressionEngine\Dependency\Aws\S3\S3Client;
-use ExpressionEngine\Dependency\Aws\S3\Exception\S3Exception;
 use ExpressionEngine\Dependency\League\Flysystem;
 use ExpressionEngine\Library\Filesystem\Adapter\AdapterInterface;
 use ExpressionEngine\Library\Filesystem\Adapter\AdapterTrait;
@@ -121,20 +120,14 @@ class CloudflareR2 extends AbstractS3 implements AdapterInterface, ValidationAwa
     }
 
     /**
-     * Copy a file.
+     * Get the object acl presented as a visibility.
      *
      * @param string $path
-     * @param string $newpath
      *
-     * @return bool
+     * @return string
      */
-    public function copy($path, $newpath)
+    protected function getRawVisibility($path)
     {
-        try {
-            $this->s3Client->copy($this->bucket, $this->applyPathPrefix($path), $this->bucket, $this->applyPathPrefix($newpath), 'private', $this->options);
-        } catch (S3Exception $e) {
-            return \false;
-        }
-        return \true;
+        return Flysystem\AdapterInterface::VISIBILITY_PRIVATE;
     }
 }

@@ -25,7 +25,7 @@ class ShapeMap
      */
     public function getShapeNames()
     {
-        return \array_keys($this->definitions);
+        return array_keys($this->definitions);
     }
     /**
      * Resolve a shape reference
@@ -41,7 +41,7 @@ class ShapeMap
         if (!isset($this->definitions[$shape])) {
             throw new \InvalidArgumentException('Shape not found: ' . $shape);
         }
-        $isSimple = \count($shapeRef) == 1;
+        $isSimple = count($shapeRef) == 1;
         if ($isSimple && isset($this->simple[$shape])) {
             return $this->simple[$shape];
         }

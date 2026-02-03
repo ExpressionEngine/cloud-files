@@ -30,7 +30,7 @@ final class Log
     }
     public static function toStream($stream)
     {
-        \assert(\get_resource_type($stream) == "stream");
+        assert(get_resource_type($stream) == "stream");
         CRT::log_to_stream($stream);
     }
     public static function stop()
@@ -39,7 +39,7 @@ final class Log
     }
     public static function setLogLevel($level)
     {
-        \assert($level >= self::NONE && $level <= self::TRACE);
+        assert($level >= self::NONE && $level <= self::TRACE);
         CRT::log_set_level($level);
     }
     public static function log($level, $message)

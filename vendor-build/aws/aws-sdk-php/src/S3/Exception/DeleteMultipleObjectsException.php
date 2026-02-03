@@ -19,8 +19,8 @@ class DeleteMultipleObjectsException extends \Exception implements MonitoringEve
      */
     public function __construct(array $deleted, array $errors)
     {
-        $this->deleted = \array_values($deleted);
-        $this->errors = \array_values($errors);
+        $this->deleted = array_values($deleted);
+        $this->errors = array_values($errors);
         parent::__construct('Unable to delete certain keys when executing a' . ' DeleteMultipleObjects request: ' . self::createMessageFromErrors($errors));
     }
     /**
@@ -32,8 +32,8 @@ class DeleteMultipleObjectsException extends \Exception implements MonitoringEve
      */
     public static function createMessageFromErrors(array $errors)
     {
-        return "\n- " . \implode("\n- ", \array_map(function ($key) {
-            return \json_encode($key);
+        return "\n- " . implode("\n- ", array_map(function ($key) {
+            return json_encode($key);
         }, $errors));
     }
     /**

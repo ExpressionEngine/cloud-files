@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Filesystem Adapter for integrating with Backblaze B2 service
+- Support for PHP 8.4
+
+### Fixed
+
+- An issue with Cloudflare R2 where moving a file into a different subfolder would fail
+
 ## [1.1.0] - 2023-07-28
 
 ### Added

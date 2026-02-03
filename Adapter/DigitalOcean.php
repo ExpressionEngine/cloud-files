@@ -27,7 +27,7 @@ class DigitalOcean extends AbstractS3 implements AdapterInterface, ValidationAwa
                 'key'    => $settings['key'],
                 'secret' => $settings['secret']
             ],
-            'region' => $settings['region'],
+            'region' => $settings['region'] ?: 'nyc1',
             'version' => 'latest',
             'endpoint' => "https://{$settings['region']}.digitaloceanspaces.com",
             'exception_class' => \ExpressionEngine\Dependency\Aws\S3\Exception\S3Exception::class

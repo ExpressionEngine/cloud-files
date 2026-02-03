@@ -66,7 +66,7 @@ class MountManager implements FilesystemInterface
      */
     public function mountFilesystem($prefix, FilesystemInterface $filesystem)
     {
-        if (!\is_string($prefix)) {
+        if (!is_string($prefix)) {
             throw new InvalidArgumentException(__METHOD__ . ' expects argument #1 to be a string.');
         }
         $this->filesystems[$prefix] = $filesystem;
@@ -102,12 +102,12 @@ class MountManager implements FilesystemInterface
         if (empty($arguments)) {
             throw new InvalidArgumentException('At least one argument needed');
         }
-        $path = \array_shift($arguments);
-        if (!\is_string($path)) {
+        $path = array_shift($arguments);
+        if (!is_string($path)) {
             throw new InvalidArgumentException('First argument should be a string');
         }
         list($prefix, $path) = $this->getPrefixAndPath($path);
-        \array_unshift($arguments, $path);
+        array_unshift($arguments, $path);
         return [$prefix, $arguments];
     }
     /**
@@ -165,8 +165,8 @@ class MountManager implements FilesystemInterface
         }
         list($prefixTo, $to) = $this->getPrefixAndPath($to);
         $result = $this->getFilesystem($prefixTo)->writeStream($to, $buffer, $config);
-        if (\is_resource($buffer)) {
-            \fclose($buffer);
+        if (is_resource($buffer)) {
+            fclose($buffer);
         }
         return $result;
     }
@@ -238,7 +238,7 @@ class MountManager implements FilesystemInterface
             // Let it pass, it's ok, don't panic.
         }
         $callback = [$filesystem, $method];
-        return \call_user_func_array($callback, $arguments);
+        return call_user_func_array($callback, $arguments);
     }
     /**
      * @param string $path
@@ -249,10 +249,10 @@ class MountManager implements FilesystemInterface
      */
     protected function getPrefixAndPath($path)
     {
-        if (\strpos($path, '://') < 1) {
+        if (strpos($path, '://') < 1) {
             throw new InvalidArgumentException('No prefix detected in path: ' . $path);
         }
-        return \explode('://', $path, 2);
+        return explode('://', $path, 2);
     }
     /**
      * Check whether a file exists.

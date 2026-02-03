@@ -22,10 +22,10 @@ trait MetadataParserTrait
                 $value = (int) $value;
                 break;
             case 'boolean':
-                $value = \filter_var($value, \FILTER_VALIDATE_BOOLEAN);
+                $value = filter_var($value, \FILTER_VALIDATE_BOOLEAN);
                 break;
             case 'blob':
-                $value = \base64_decode($value);
+                $value = base64_decode($value);
                 break;
             case 'timestamp':
                 try {
@@ -38,7 +38,7 @@ trait MetadataParserTrait
                 }
             case 'string':
                 if ($shape['jsonvalue']) {
-                    $value = $this->parseJson(\base64_decode($value), $response);
+                    $value = $this->parseJson(base64_decode($value), $response);
                 }
                 break;
         }
@@ -52,12 +52,12 @@ trait MetadataParserTrait
         // Check if the headers are prefixed by a location name
         $result[$name] = [];
         $prefix = $shape['locationName'];
-        $prefixLen = \strlen($prefix);
+        $prefixLen = strlen($prefix);
         foreach ($response->getHeaders() as $k => $values) {
             if (!$prefixLen) {
-                $result[$name][$k] = \implode(', ', $values);
-            } elseif (\stripos($k, $prefix) === 0) {
-                $result[$name][\substr($k, $prefixLen)] = \implode(', ', $values);
+                $result[$name][$k] = implode(', ', $values);
+            } elseif (stripos($k, $prefix) === 0) {
+                $result[$name][substr($k, $prefixLen)] = implode(', ', $values);
             }
         }
     }

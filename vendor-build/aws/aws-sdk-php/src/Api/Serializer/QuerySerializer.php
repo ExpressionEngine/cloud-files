@@ -6,6 +6,7 @@ use ExpressionEngine\Dependency\Aws\Api\Service;
 use ExpressionEngine\Dependency\Aws\CommandInterface;
 use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointProviderV2;
 use ExpressionEngine\Dependency\Aws\EndpointV2\EndpointV2SerializerTrait;
+use ExpressionEngine\Dependency\Aws\EndpointV2\Ruleset\RulesetEndpoint;
 use ExpressionEngine\Dependency\GuzzleHttp\Psr7\Request;
 use ExpressionEngine\Dependency\Psr\Http\Message\RequestInterface;
 /**
@@ -18,7 +19,7 @@ class QuerySerializer
     private $endpoint;
     private $api;
     private $paramBuilder;
-    public function __construct(Service $api, $endpoint, callable $paramBuilder = null)
+    public function __construct(Service $api, $endpoint, ?callable $paramBuilder = null)
     {
         $this->api = $api;
         $this->endpoint = $endpoint;
@@ -34,19 +35,19 @@ class QuerySerializer
      *
      * @return RequestInterface
      */
-    public function __invoke(CommandInterface $command, $endpointProvider = null, $clientArgs = null)
+    public function __invoke(CommandInterface $command, $endpoint = null)
     {
         $operation = $this->api->getOperation($command->getName());
         $body = ['Action' => $command->getName(), 'Version' => $this->api->getMetadata('apiVersion')];
         $commandArgs = $command->toArray();
         // Only build up the parameters when there are parameters to build
         if ($commandArgs) {
-            $body += \call_user_func($this->paramBuilder, $operation->getInput(), $commandArgs);
+            $body += call_user_func($this->paramBuilder, $operation->getInput(), $commandArgs);
         }
-        $body = \http_build_query($body, '', '&', \PHP_QUERY_RFC3986);
-        $headers = ['Content-Length' => \strlen($body), 'Content-Type' => 'application/x-www-form-urlencoded'];
-        if ($endpointProvider instanceof EndpointProviderV2) {
-            $this->setRequestOptions($endpointProvider, $command, $operation, $commandArgs, $clientArgs, $headers);
+        $body = http_build_query($body, '', '&', \PHP_QUERY_RFC3986);
+        $headers = ['Content-Length' => strlen($body), 'Content-Type' => 'application/x-www-form-urlencoded'];
+        if ($endpoint instanceof RulesetEndpoint) {
+            $this->setEndpointV2RequestOptions($endpoint, $headers);
         }
         return new Request('POST', $this->endpoint, $headers, $body);
     }

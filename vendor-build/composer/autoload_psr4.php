@@ -11,7 +11,7 @@ return array(
     'ExpressionEngine\\Dependency\\Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
     'ExpressionEngine\\Dependency\\League\\MimeTypeDetection\\' => array($vendorDir . '/league/mime-type-detection/src'),
     'ExpressionEngine\\Dependency\\League\\Flysystem\\AwsS3v3\\' => array($vendorDir . '/league/flysystem-aws-s3-v3/src'),
-    'ExpressionEngine\\Dependency\\League\\Flysystem\\' => array($vendorDir . '/league/flysystem/src'),
+    'ExpressionEngine\\Dependency\\League\\Flysystem\\' => array($vendorDir . '/expressionengine/flysystem/src', $vendorDir . '/league/flysystem/src'),
     'ExpressionEngine\\Dependency\\JmesPath\\' => array($vendorDir . '/mtdowling/jmespath.php/src'),
     'ExpressionEngine\\Dependency\\GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'ExpressionEngine\\Dependency\\GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),

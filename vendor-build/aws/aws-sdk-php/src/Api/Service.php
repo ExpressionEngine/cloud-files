@@ -78,7 +78,7 @@ class Service extends AbstractModel
      * @return callable
      * @throws \UnexpectedValueException
      */
-    public static function createErrorParser($protocol, Service $api = null)
+    public static function createErrorParser($protocol, ?Service $api = null)
     {
         static $mapping = ['json' => ErrorParser\JsonRpcErrorParser::class, 'query' => ErrorParser\XmlErrorParser::class, 'rest-json' => ErrorParser\RestJsonErrorParser::class, 'rest-xml' => ErrorParser\XmlErrorParser::class, 'ec2' => ErrorParser\XmlErrorParser::class];
         if (isset($mapping[$protocol])) {
@@ -157,7 +157,7 @@ class Service extends AbstractModel
      */
     public function getServiceName()
     {
-        return $this->definition['metadata']['serviceIdentifier'];
+        return $this->definition['metadata']['serviceIdentifier'] ?? null;
     }
     /**
      * Get the default signature version of the service.
@@ -214,10 +214,8 @@ class Service extends AbstractModel
                 throw new \InvalidArgumentException("Unknown operation: {$name}");
             }
             $this->operations[$name] = new Operation($this->definition['operations'][$name], $this->shapeMap);
-        } else {
-            if ($this->modifiedModel) {
-                $this->operations[$name] = new Operation($this->definition['operations'][$name], $this->shapeMap);
-            }
+        } elseif ($this->modifiedModel) {
+            $this->operations[$name] = new Operation($this->definition['operations'][$name], $this->shapeMap);
         }
         return $this->operations[$name];
     }
@@ -278,7 +276,7 @@ class Service extends AbstractModel
     public function getPaginators()
     {
         if (!isset($this->paginators)) {
-            $res = \call_user_func($this->apiProvider, 'paginator', $this->serviceName, $this->apiVersion);
+            $res = call_user_func($this->apiProvider, 'paginator', $this->serviceName, $this->apiVersion);
             $this->paginators = isset($res['pagination']) ? $res['pagination'] : [];
         }
         return $this->paginators;
@@ -321,7 +319,7 @@ class Service extends AbstractModel
     public function getWaiters()
     {
         if (!isset($this->waiters)) {
-            $res = \call_user_func($this->apiProvider, 'waiter', $this->serviceName, $this->apiVersion);
+            $res = call_user_func($this->apiProvider, 'waiter', $this->serviceName, $this->apiVersion);
             $this->waiters = isset($res['waiters']) ? $res['waiters'] : [];
         }
         return $this->waiters;
@@ -400,6 +398,7 @@ class Service extends AbstractModel
     public function setDefinition($definition)
     {
         $this->definition = $definition;
+        $this->shapeMap = new ShapeMap($definition['shapes']);
         $this->modifiedModel = \true;
     }
     /**

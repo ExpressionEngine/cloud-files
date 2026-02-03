@@ -30,8 +30,8 @@ class PostObject
     {
         $this->client = $client;
         $this->bucket = $bucket;
-        if (\is_array($jsonPolicy)) {
-            $jsonPolicy = \json_encode($jsonPolicy);
+        if (is_array($jsonPolicy)) {
+            $jsonPolicy = json_encode($jsonPolicy);
         }
         $this->jsonPolicy = $jsonPolicy;
         $this->formAttributes = ['action' => $this->generateUri(), 'method' => 'POST', 'enctype' => 'multipart/form-data'];
@@ -107,7 +107,7 @@ class PostObject
     private function generateUri()
     {
         $uri = new Uri($this->client->getEndpoint());
-        if ($this->client->getConfig('use_path_style_endpoint') === \true || $uri->getScheme() === 'https' && \strpos($this->bucket, '.') !== \false) {
+        if ($this->client->getConfig('use_path_style_endpoint') === \true || $uri->getScheme() === 'https' && strpos($this->bucket, '.') !== \false) {
             // Use path-style URLs
             $uri = $uri->withPath("/{$this->bucket}");
         } else {
@@ -118,7 +118,7 @@ class PostObject
     }
     protected function getPolicyAndSignature(CredentialsInterface $creds)
     {
-        $jsonPolicy64 = \base64_encode($this->jsonPolicy);
-        return ['AWSAccessKeyId' => $creds->getAccessKeyId(), 'policy' => $jsonPolicy64, 'signature' => \base64_encode(\hash_hmac('sha1', $jsonPolicy64, $creds->getSecretKey(), \true))];
+        $jsonPolicy64 = base64_encode($this->jsonPolicy);
+        return ['AWSAccessKeyId' => $creds->getAccessKeyId(), 'policy' => $jsonPolicy64, 'signature' => base64_encode(hash_hmac('sha1', $jsonPolicy64, $creds->getSecretKey(), \true))];
     }
 }

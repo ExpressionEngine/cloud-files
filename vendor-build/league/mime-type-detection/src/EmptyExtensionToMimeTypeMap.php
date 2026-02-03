@@ -5,7 +5,7 @@ namespace ExpressionEngine\Dependency\League\MimeTypeDetection;
 
 class EmptyExtensionToMimeTypeMap implements ExtensionToMimeTypeMap
 {
-    public function lookupMimeType(string $extension) : ?string
+    public function lookupMimeType(string $extension): ?string
     {
         return null;
     }

@@ -199,14 +199,14 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
      */
     public function listContents($directory = '', $recursive = \false)
     {
-        $prefix = $this->applyPathPrefix(\rtrim($directory, '/') . '/');
-        $options = ['Bucket' => $this->bucket, 'Prefix' => \ltrim($prefix, '/')];
+        $prefix = $this->applyPathPrefix(rtrim($directory, '/') . '/');
+        $options = ['Bucket' => $this->bucket, 'Prefix' => ltrim($prefix, '/')];
         if ($recursive === \false) {
             $options['Delimiter'] = '/';
         }
         $listing = $this->retrievePaginatedListing($options);
         $normalizer = [$this, 'normalizeResponse'];
-        $normalized = \array_map($normalizer, $listing);
+        $normalized = array_map($normalizer, $listing);
         return Util::emulateDirectories($normalized);
     }
     /**
@@ -219,7 +219,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
         $resultPaginator = $this->s3Client->getPaginator('ListObjectsV2', $options);
         $listing = [];
         foreach ($resultPaginator as $result) {
-            $listing = \array_merge($listing, $result->get('Contents') ?: [], $result->get('CommonPrefixes') ?: []);
+            $listing = array_merge($listing, $result->get('Contents') ?: [], $result->get('CommonPrefixes') ?: []);
         }
         return $listing;
     }
@@ -385,7 +385,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
         } catch (S3Exception $exception) {
             return \false;
         }
-        return \compact('path', 'visibility');
+        return compact('path', 'visibility');
     }
     /**
      * Get the visibility of a file.
@@ -403,14 +403,14 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
      */
     public function applyPathPrefix($path)
     {
-        return \ltrim(parent::applyPathPrefix($path), '/');
+        return ltrim(parent::applyPathPrefix($path), '/');
     }
     /**
      * {@inheritdoc}
      */
     public function setPathPrefix($prefix)
     {
-        $prefix = \ltrim((string) $prefix, '/');
+        $prefix = ltrim((string) $prefix, '/');
         return parent::setPathPrefix($prefix);
     }
     /**
@@ -446,13 +446,13 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
     {
         $key = $this->applyPathPrefix($path);
         $options = $this->getOptionsFromConfig($config);
-        $acl = \array_key_exists('ACL', $options) ? $options['ACL'] : 'private';
+        $acl = array_key_exists('ACL', $options) ? $options['ACL'] : 'private';
         if (!$this->isOnlyDir($path)) {
             if (!isset($options['ContentType'])) {
                 $options['ContentType'] = Util::guessMimeType($path, $body);
             }
             if (!isset($options['ContentLength'])) {
-                $options['ContentLength'] = \is_resource($body) ? Util::getStreamSize($body) : Util::contentSize($body);
+                $options['ContentLength'] = is_resource($body) ? Util::getStreamSize($body) : Util::contentSize($body);
             }
             if ($options['ContentLength'] === null) {
                 unset($options['ContentLength']);
@@ -474,7 +474,7 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
      */
     private function isOnlyDir($path)
     {
-        return \substr($path, -1) === '/';
+        return substr($path, -1) === '/';
     }
     /**
      * Get options from the config.
@@ -517,16 +517,16 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
     protected function normalizeResponse(array $response, $path = null)
     {
         $result = ['path' => $path ?: $this->removePathPrefix(isset($response['Key']) ? $response['Key'] : $response['Prefix'])];
-        $result = \array_merge($result, Util::pathinfo($result['path']));
+        $result = array_merge($result, Util::pathinfo($result['path']));
         if (isset($response['LastModified'])) {
-            $result['timestamp'] = \strtotime($response['LastModified']);
+            $result['timestamp'] = strtotime($response['LastModified']);
         }
         if ($this->isOnlyDir($result['path'])) {
             $result['type'] = 'dir';
-            $result['path'] = \rtrim($result['path'], '/');
+            $result['path'] = rtrim($result['path'], '/');
             return $result;
         }
-        return \array_merge($result, Util::map($response, static::$resultMap), ['type' => 'file']);
+        return array_merge($result, Util::map($response, static::$resultMap), ['type' => 'file']);
     }
     /**
      * @param string $location
@@ -537,12 +537,12 @@ class AwsS3Adapter extends AbstractAdapter implements CanOverwriteFiles
     {
         // Maybe this isn't an actual key, but a prefix.
         // Do a prefix listing of objects to determine.
-        $command = $this->s3Client->getCommand('ListObjectsV2', ['Bucket' => $this->bucket, 'Prefix' => \rtrim($location, '/') . '/', 'MaxKeys' => 1]);
+        $command = $this->s3Client->getCommand('ListObjectsV2', ['Bucket' => $this->bucket, 'Prefix' => rtrim($location, '/') . '/', 'MaxKeys' => 1]);
         try {
             $result = $this->s3Client->execute($command);
             return $result['Contents'] || $result['CommonPrefixes'];
         } catch (S3Exception $e) {
-            if (\in_array($e->getStatusCode(), [403, 404], \true)) {
+            if (in_array($e->getStatusCode(), [403, 404], \true)) {
                 return \false;
             }
             throw $e;

@@ -1,5 +1,6 @@
 <?php
 
+declare (strict_types=1);
 namespace ExpressionEngine\Dependency\GuzzleHttp\Promise;
 
 final class Create
@@ -8,18 +9,16 @@ final class Create
      * Creates a promise for a value if the value is not a promise.
      *
      * @param mixed $value Promise or value.
-     *
-     * @return PromiseInterface
      */
-    public static function promiseFor($value)
+    public static function promiseFor($value): PromiseInterface
     {
         if ($value instanceof PromiseInterface) {
             return $value;
         }
         // Return a Guzzle promise that shadows the given promise.
-        if (\is_object($value) && \method_exists($value, 'then')) {
-            $wfn = \method_exists($value, 'wait') ? [$value, 'wait'] : null;
-            $cfn = \method_exists($value, 'cancel') ? [$value, 'cancel'] : null;
+        if (is_object($value) && method_exists($value, 'then')) {
+            $wfn = method_exists($value, 'wait') ? [$value, 'wait'] : null;
+            $cfn = method_exists($value, 'cancel') ? [$value, 'cancel'] : null;
             $promise = new Promise($wfn, $cfn);
             $value->then([$promise, 'resolve'], [$promise, 'reject']);
             return $promise;
@@ -31,10 +30,8 @@ final class Create
      * If the provided reason is a promise, then it is returned as-is.
      *
      * @param mixed $reason Promise or reason.
-     *
-     * @return PromiseInterface
      */
-    public static function rejectionFor($reason)
+    public static function rejectionFor($reason): PromiseInterface
     {
         if ($reason instanceof PromiseInterface) {
             return $reason;
@@ -45,12 +42,10 @@ final class Create
      * Create an exception for a rejected promise value.
      *
      * @param mixed $reason
-     *
-     * @return \Exception|\Throwable
      */
-    public static function exceptionFor($reason)
+    public static function exceptionFor($reason): \Throwable
     {
-        if ($reason instanceof \Exception || $reason instanceof \Throwable) {
+        if ($reason instanceof \Throwable) {
             return $reason;
         }
         return new RejectionException($reason);
@@ -59,15 +54,13 @@ final class Create
      * Returns an iterator for the given value.
      *
      * @param mixed $value
-     *
-     * @return \Iterator
      */
-    public static function iterFor($value)
+    public static function iterFor($value): \Iterator
     {
         if ($value instanceof \Iterator) {
             return $value;
         }
-        if (\is_array($value)) {
+        if (is_array($value)) {
             return new \ArrayIterator($value);
         }
         return new \ArrayIterator([$value]);

@@ -10,7 +10,7 @@ namespace ExpressionEngine\Dependency\JmesPath;
  *
  * @return mixed
  */
-if (!\function_exists(__NAMESPACE__ . '\\search')) {
+if (!function_exists(__NAMESPACE__ . '\search')) {
     function search($expression, $data)
     {
         return Env::search($expression, $data);

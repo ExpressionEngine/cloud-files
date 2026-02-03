@@ -43,7 +43,7 @@ class BucketEndpointArnMiddleware
      */
     public static function wrap(Service $service, $region, array $config, $isUseEndpointV2)
     {
-        return function (callable $handler) use($service, $region, $config, $isUseEndpointV2) {
+        return function (callable $handler) use ($service, $region, $config, $isUseEndpointV2) {
             return new self($handler, $service, $region, $config, $isUseEndpointV2);
         };
     }
@@ -72,7 +72,7 @@ class BucketEndpointArnMiddleware
                 if (!empty($arnableKey) && ArnParser::isArn($cmd[$arnableKey])) {
                     try {
                         // Throw for commands that do not support ARN inputs
-                        if (\in_array($cmd->getName(), $this->nonArnableCommands)) {
+                        if (in_array($cmd->getName(), $this->nonArnableCommands)) {
                             throw new S3Exception('ARN values cannot be used in the bucket field for' . ' the ' . $cmd->getName() . ' operation.', $cmd);
                         }
                         if (!$this->isUseEndpointV2) {
@@ -82,11 +82,11 @@ class BucketEndpointArnMiddleware
                         }
                         // Remove encoded bucket string from path
                         $path = $req->getUri()->getPath();
-                        $encoded = \rawurlencode($cmd[$arnableKey]);
-                        $len = \strlen($encoded) + 1;
-                        if (\trim(\substr($path, 0, $len), '/') === "{$encoded}") {
-                            $path = \substr($path, $len);
-                            if (\substr($path, 0, 1) !== "/") {
+                        $encoded = rawurlencode($cmd[$arnableKey]);
+                        $len = strlen($encoded) + 1;
+                        if (trim(substr($path, 0, $len), '/') === "{$encoded}") {
+                            $path = substr($path, $len);
+                            if (substr($path, 0, 1) !== "/") {
                                 $path = '/' . $path;
                             }
                         }
@@ -138,18 +138,16 @@ class BucketEndpointArnMiddleware
         $fipsString = $useFips ? "-fips" : "";
         if ($arn instanceof OutpostsAccessPointArn) {
             $host .= '.' . $arn->getOutpostId() . '.s3-outposts';
-        } else {
-            if ($arn instanceof ObjectLambdaAccessPointArn) {
-                if (!empty($this->config['endpoint'])) {
-                    return $host . '.' . $this->config['endpoint'];
-                } else {
-                    $host .= ".s3-object-lambda{$fipsString}";
-                }
+        } else if ($arn instanceof ObjectLambdaAccessPointArn) {
+            if (!empty($this->config['endpoint'])) {
+                return $host . '.' . $this->config['endpoint'];
             } else {
-                $host .= ".s3-accesspoint{$fipsString}";
-                if (!empty($this->config['dual_stack'])) {
-                    $host .= '.dualstack';
-                }
+                $host .= ".s3-object-lambda{$fipsString}";
+            }
+        } else {
+            $host .= ".s3-accesspoint{$fipsString}";
+            if (!empty($this->config['dual_stack'])) {
+                $host .= '.dualstack';
             }
         }
         if (!empty($this->config['use_arn_region']->isUseArnRegion())) {
@@ -192,7 +190,7 @@ class BucketEndpointArnMiddleware
                 throw new UnresolvedEndpointException('Path-style addressing is currently not supported with' . ' access points. Please disable path-style or do not' . ' supply an access point ARN.');
             }
             // Custom endpoint is not supported with access points
-            if (!\is_null($this->config['endpoint']) && !$arn instanceof ObjectLambdaAccessPointArn) {
+            if (!is_null($this->config['endpoint']) && !$arn instanceof ObjectLambdaAccessPointArn) {
                 throw new UnresolvedEndpointException('A custom endpoint has been supplied along with an access' . ' point ARN, and these are not compatible with each other.' . ' Please only use one or the other.');
             }
             // Dualstack is not supported with object lambda access points

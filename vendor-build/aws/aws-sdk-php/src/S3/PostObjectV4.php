@@ -111,29 +111,26 @@ class PostObjectV4
     private function generateUri()
     {
         $uri = new Uri($this->client->getEndpoint());
-        if ($this->client->getConfig('use_path_style_endpoint') === \true || $uri->getScheme() === 'https' && \strpos($this->bucket, '.') !== \false) {
+        if ($this->client->getConfig('use_path_style_endpoint') === \true || $uri->getScheme() === 'https' && strpos($this->bucket, '.') !== \false) {
             // Use path-style URLs
             $uri = $uri->withPath("/{$this->bucket}");
-        } else {
-            // Use virtual-style URLs if haven't been set up already
-            if (\strpos($uri->getHost(), $this->bucket . '.') !== 0) {
-                $uri = $uri->withHost($this->bucket . '.' . $uri->getHost());
-            }
+        } else if (strpos($uri->getHost(), $this->bucket . '.') !== 0) {
+            $uri = $uri->withHost($this->bucket . '.' . $uri->getHost());
         }
         return (string) $uri;
     }
     protected function getPolicyAndSignature(CredentialsInterface $credentials, array $policy)
     {
-        $ldt = \gmdate(SignatureV4::ISO8601_BASIC);
-        $sdt = \substr($ldt, 0, 8);
+        $ldt = gmdate(SignatureV4::ISO8601_BASIC);
+        $sdt = substr($ldt, 0, 8);
         $policy['conditions'][] = ['X-Amz-Date' => $ldt];
         $region = $this->client->getRegion();
         $scope = $this->createScope($sdt, $region, 's3');
         $creds = "{$credentials->getAccessKeyId()}/{$scope}";
         $policy['conditions'][] = ['X-Amz-Credential' => $creds];
         $policy['conditions'][] = ['X-Amz-Algorithm' => "AWS4-HMAC-SHA256"];
-        $jsonPolicy64 = \base64_encode(\json_encode($policy));
+        $jsonPolicy64 = base64_encode(json_encode($policy));
         $key = $this->getSigningKey($sdt, $region, 's3', $credentials->getSecretKey());
-        return ['X-Amz-Credential' => $creds, 'X-Amz-Algorithm' => "AWS4-HMAC-SHA256", 'X-Amz-Date' => $ldt, 'Policy' => $jsonPolicy64, 'X-Amz-Signature' => \bin2hex(\hash_hmac('sha256', $jsonPolicy64, $key, \true))];
+        return ['X-Amz-Credential' => $creds, 'X-Amz-Algorithm' => "AWS4-HMAC-SHA256", 'X-Amz-Date' => $ldt, 'Policy' => $jsonPolicy64, 'X-Amz-Signature' => bin2hex(hash_hmac('sha256', $jsonPolicy64, $key, \true))];
     }
 }

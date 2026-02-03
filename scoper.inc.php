@@ -35,7 +35,7 @@ return [
         static function (string $filePath, string $prefix, string $content): string {
             if ($filePath === __DIR__ . '/vendor/aws/aws-sdk-php/src/Signature/SignatureV4.php') {
                 $content = str_replace(
-                    "const ISO8601_BASIC = 'ExpressionEngine\\\\Dependency\\\\",
+                    "const ISO8601_BASIC = 'ExpressionEngine\\Dependency\\",
                     "const ISO8601_BASIC = '",
                     $content
                 );
@@ -49,13 +49,19 @@ return [
 
             return $content;
         },
-    ],                       // callable[]
-    // 'files-whitelist' => [],                // string[]
-    'whitelist' => [],                      // string[]
-    #'expose-global-constants' => true,   // bool
-    #'expose-global-classes' => true,     // bool
-    #'expose-global-functions' => true,   // bool
-    #'exclude-constants' => [],             // string[]
-    #'exclude-classes' => [],               // string[]
-    #'exclude-functions' => [],             // string[]
+    ],                             // callable[]
+    // 'exclude-files' => [],      // list<string>
+    // 'exclude-namespaces' => [], // list<string|regex>
+    // 'exclude-constants' => [],  // list<string|regex>
+    // 'exclude-classes' => [],    // list<string|regex>
+    // 'exclude-functions' => [],  // list<string|regex>
+
+    // 'expose-global-constants' => true,   // bool
+    // 'expose-global-classes' => true,     // bool
+    // 'expose-global-functions' => true,   // bool
+
+    // 'expose-namespaces' => [], // list<string|regex>
+    // 'expose-constants' => [],  // list<string|regex>
+    // 'expose-classes' => [],    // list<string|regex>
+    // 'expose-functions' => [],  // list<string|regex>
 ];

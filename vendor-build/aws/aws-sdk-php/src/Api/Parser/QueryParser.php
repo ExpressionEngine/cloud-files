@@ -23,7 +23,7 @@ class QueryParser extends AbstractParser
      *                                      back of result wrappers from the
      *                                      output structure.
      */
-    public function __construct(Service $api, XmlParser $xmlParser = null, $honorResultWrapper = \true)
+    public function __construct(Service $api, ?XmlParser $xmlParser = null, $honorResultWrapper = \true)
     {
         parent::__construct($api);
         $this->parser = $xmlParser ?: new XmlParser();

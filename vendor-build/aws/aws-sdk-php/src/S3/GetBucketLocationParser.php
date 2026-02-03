@@ -26,7 +26,7 @@ class GetBucketLocationParser extends AbstractParser
         $result = $fn($command, $response);
         if ($command->getName() === 'GetBucketLocation') {
             $location = 'us-east-1';
-            if (\preg_match('/>(.+?)<\\/LocationConstraint>/', $response->getBody(), $matches)) {
+            if (preg_match('/>(.+?)<\/LocationConstraint>/', $response->getBody(), $matches)) {
                 $location = $matches[1] === 'EU' ? 'eu-west-1' : $matches[1];
             }
             $result['LocationConstraint'] = $location;

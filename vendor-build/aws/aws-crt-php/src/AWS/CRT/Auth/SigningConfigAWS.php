@@ -12,7 +12,7 @@ class SigningConfigAWS extends NativeResource
 {
     public static function defaults()
     {
-        return ['algorithm' => SigningAlgorithm::SIGv4, 'signature_type' => SignatureType::HTTP_REQUEST_HEADERS, 'credentials_provider' => null, 'region' => null, 'service' => null, 'use_double_uri_encode' => \false, 'should_normalize_uri_path' => \false, 'omit_session_token' => \false, 'signed_body_value' => null, 'signed_body_header_type' => SignedBodyHeaderType::NONE, 'expiration_in_seconds' => 0, 'date' => \time(), 'should_sign_header' => null];
+        return ['algorithm' => SigningAlgorithm::SIGv4, 'signature_type' => SignatureType::HTTP_REQUEST_HEADERS, 'credentials_provider' => null, 'region' => null, 'service' => null, 'use_double_uri_encode' => \false, 'should_normalize_uri_path' => \false, 'omit_session_token' => \false, 'signed_body_value' => null, 'signed_body_header_type' => SignedBodyHeaderType::NONE, 'expiration_in_seconds' => 0, 'date' => time(), 'should_sign_header' => null];
     }
     private $options;
     public function __construct(array $options = [])

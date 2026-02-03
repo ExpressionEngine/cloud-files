@@ -33,7 +33,7 @@ jobs:
           - name: Setup PHP
             uses: shivammathur/setup-php@v2
             with:
-                php-version: '7.4'
+                php-version: '8.2'
                 extensions: dom, curl, sqlite, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, soap, intl, gd, exif, iconv, imagick
                 coverage: none
                 ini-values: error_log=/home/runner/php_errors.log, memory_limit=128M
@@ -52,7 +52,7 @@ jobs:
             working-directory: ee/build-tools
             run: |
               content=`node -pe 'JSON.parse(process.argv[1]).tag' "$(cat build.json)"`
-              echo "::set-output name=BUILD_VERSION::$content"
+              echo "BUILD_VERSION=$content" >> $GITHUB_OUTPUT
 
           - name: Run build process
             working-directory: ee/build-tools
@@ -98,7 +98,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.4, 8.0, 8.1, 8.2]
+                php: [7.4, 8.0, 8.1, 8.2, 8.3, 8.4]
                 os: [ubuntu-latest]
 
         name: Cypress Tests, PHP${{ matrix.php }} - ${{ matrix.os }}
@@ -175,13 +175,12 @@ jobs:
               run: php tests/serve.php &
 
             - name: Run Cypress Tests
-              uses: cypress-io/github-action@v3
+              uses: cypress-io/github-action@v6
               with:
                 spec: cypress/integration/addon_cloud_files/**
                 browser: chrome
-                headless: true
                 working-directory: tests/cypress
-                config-file: cypress.json
+                config-file: cypress.config.js
               env:
                 CYPRESS_AWS_S3_KEY: ${{secrets.AWS_S3_KEY}}
                 CYPRESS_AWS_S3_SECRET: ${{secrets.AWS_S3_SECRET}}
@@ -196,18 +195,22 @@ jobs:
                 CYPRESS_CF_R2_SECRET: ${{secrets.CF_R2_SECRET}}
                 CYPRESS_CF_R2_BUCKET: ${{secrets.CF_R2_BUCKET}}
                 CYPRESS_CF_R2_URL: ${{secrets.CF_R2_URL}}
+                CYPRESS_BB_B2_KEY: ${{secrets.BB_B2_KEY}}
+                CYPRESS_BB_B2_SECRET: ${{secrets.BB_B2_SECRET}}
+                CYPRESS_BB_B2_REGION: ${{secrets.BB_B2_REGION}}
+                CYPRESS_BB_B2_BUCKET: ${{secrets.BB_B2_BUCKET}}
                 CYPRESS_CF_TEST_FOLDER: ${{ matrix.php }}_${{ github.sha }}
                 CYPRESS_KEEP_DEBUG: ${{vars.KEEP_DEBUG != 'false'}}
 
             - name: Archive screenshots
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v4
               if: vars.KEEP_DEBUG != 'false' && failure()
               with:
                 name: cypress-tests-PHP${{ matrix.php }}
                 path: tests/cypress/cypress/screenshots/
 
             - name: Archive server errors
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v4
               if: vars.KEEP_DEBUG != 'false' && failure()
               with:
                 name: error.PHP${{ matrix.php }}.log

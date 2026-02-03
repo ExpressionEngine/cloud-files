@@ -10,7 +10,7 @@ class Configuration implements ConfigurationInterface
     public function __construct($useArnRegion)
     {
         $this->useArnRegion = Aws\boolean_value($useArnRegion);
-        if (\is_null($this->useArnRegion)) {
+        if (is_null($this->useArnRegion)) {
             throw new ConfigurationException("'use_arn_region' config option" . " must be a boolean value.");
         }
     }

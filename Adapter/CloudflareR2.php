@@ -118,4 +118,16 @@ class CloudflareR2 extends AbstractS3 implements AdapterInterface, ValidationAwa
             $this->getPathPrefix()
         ]));
     }
+
+    /**
+     * Get the object acl presented as a visibility.
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    protected function getRawVisibility($path)
+    {
+        return Flysystem\AdapterInterface::VISIBILITY_PRIVATE;
+    }
 }

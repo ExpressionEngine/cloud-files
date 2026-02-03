@@ -36,9 +36,18 @@ trait MultipartUploadingTrait
     }
     protected function handleResult(CommandInterface $command, ResultInterface $result)
     {
-        $this->getState()->markPartAsUploaded($command['PartNumber'], ['PartNumber' => $command['PartNumber'], 'ETag' => $this->extractETag($result)]);
+        $partData = [];
+        $partData['PartNumber'] = $command['PartNumber'];
+        $partData['ETag'] = $this->extractETag($result);
+        $commandName = $command->getName();
+        $checksumResult = $commandName === 'UploadPart' ? $result : $result[$commandName . 'Result'];
+        if (isset($command['ChecksumAlgorithm'])) {
+            $checksumMemberName = 'Checksum' . strtoupper($command['ChecksumAlgorithm']);
+            $partData[$checksumMemberName] = $checksumResult[$checksumMemberName] ?? null;
+        }
+        $this->getState()->markPartAsUploaded($command['PartNumber'], $partData);
     }
-    protected abstract function extractETag(ResultInterface $result);
+    abstract protected function extractETag(ResultInterface $result);
     protected function getCompleteParams()
     {
         $config = $this->getConfig();
@@ -52,7 +61,7 @@ trait MultipartUploadingTrait
         $partSize = $this->getConfig()['part_size'] ?: MultipartUploader::PART_MIN_SIZE;
         // Adjust the part size to be larger for known, x-large uploads.
         if ($sourceSize = $this->getSourceSize()) {
-            $partSize = (int) \max($partSize, \ceil($sourceSize / MultipartUploader::PART_MAX_NUM));
+            $partSize = (int) max($partSize, ceil($sourceSize / MultipartUploader::PART_MAX_NUM));
         }
         // Ensure that the part size follows the rules: 5 MB <= size <= 5 GB.
         if ($partSize < MultipartUploader::PART_MIN_SIZE || $partSize > MultipartUploader::PART_MAX_SIZE) {
@@ -68,7 +77,7 @@ trait MultipartUploadingTrait
             $params['ACL'] = $config['acl'];
         }
         // Set the ContentType if not already present
-        if (empty($params['ContentType']) && ($type = $this->getSourceMimeType())) {
+        if (empty($params['ContentType']) && $type = $this->getSourceMimeType()) {
             $params['ContentType'] = $type;
         }
         return $params;
@@ -76,17 +85,17 @@ trait MultipartUploadingTrait
     /**
      * @return UploadState
      */
-    protected abstract function getState();
+    abstract protected function getState();
     /**
      * @return array
      */
-    protected abstract function getConfig();
+    abstract protected function getConfig();
     /**
      * @return int
      */
-    protected abstract function getSourceSize();
+    abstract protected function getSourceSize();
     /**
      * @return string|null
      */
-    protected abstract function getSourceMimeType();
+    abstract protected function getSourceMimeType();
 }

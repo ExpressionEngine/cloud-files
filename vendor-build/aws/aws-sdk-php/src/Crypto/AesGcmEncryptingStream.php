@@ -22,6 +22,10 @@ class AesGcmEncryptingStream implements AesStreamInterface, AesStreamInterfaceV2
     private $tag = '';
     private $tagLength;
     /**
+     * @var StreamInterface
+     */
+    private $stream;
+    /**
      * Same as non-static 'getAesName' method, allowing calls in a static
      * context.
      *
@@ -47,6 +51,9 @@ class AesGcmEncryptingStream implements AesStreamInterface, AesStreamInterfaceV2
         $this->aad = $aad;
         $this->tagLength = $tagLength;
         $this->keySize = $keySize;
+        // unsetting the property forces the first access to go through
+        // __get().
+        unset($this->stream);
     }
     public function getOpenSslName()
     {
@@ -67,7 +74,7 @@ class AesGcmEncryptingStream implements AesStreamInterface, AesStreamInterfaceV2
     }
     public function createStream()
     {
-        if (\version_compare(\PHP_VERSION, '7.1', '<')) {
+        if (version_compare(\PHP_VERSION, '7.1', '<')) {
             return Psr7\Utils::streamFor(AesGcm::encrypt((string) $this->plaintext, $this->initializationVector, new Key($this->key), $this->aad, $this->tag, $this->keySize));
         } else {
             return Psr7\Utils::streamFor(\openssl_encrypt((string) $this->plaintext, $this->getOpenSslName(), $this->key, \OPENSSL_RAW_DATA, $this->initializationVector, $this->tag, $this->aad, $this->tagLength));
@@ -80,7 +87,7 @@ class AesGcmEncryptingStream implements AesStreamInterface, AesStreamInterfaceV2
     {
         return $this->tag;
     }
-    public function isWritable()
+    public function isWritable(): bool
     {
         return \false;
     }

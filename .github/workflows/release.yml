@@ -79,7 +79,7 @@ jobs:
               rm -f .gitignore
 
           - name: Archive Add-on
-            uses: actions/upload-artifact@v2
+            uses: actions/upload-artifact@v4
             with:
               name: cloud_files
               path: cloud_files

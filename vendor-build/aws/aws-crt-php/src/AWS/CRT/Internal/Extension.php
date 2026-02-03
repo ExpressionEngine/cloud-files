@@ -15,7 +15,7 @@ final class Extension
 {
     function __construct()
     {
-        if (!\extension_loaded('awscrt')) {
+        if (!extension_loaded('awscrt')) {
             throw new RuntimeException('awscrt extension is not loaded');
         }
     }
@@ -26,6 +26,6 @@ final class Extension
      */
     function __call($name, $args)
     {
-        return \call_user_func_array($name, $args);
+        return call_user_func_array($name, $args);
     }
 }

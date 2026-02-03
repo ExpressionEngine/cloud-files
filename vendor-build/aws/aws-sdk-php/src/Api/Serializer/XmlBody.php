@@ -121,7 +121,7 @@ class XmlBody
     private function add_blob(Shape $shape, $name, $value, XMLWriter $xml)
     {
         $this->startElement($shape, $name, $xml);
-        $xml->writeRaw(\base64_encode($value));
+        $xml->writeRaw(base64_encode($value));
         $xml->endElement();
     }
     private function add_timestamp(TimestampShape $shape, $name, $value, XMLWriter $xml)

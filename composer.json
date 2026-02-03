@@ -11,6 +11,8 @@
     "require": {
         "php": "^7.2 || ^8.0",
         "bamarni/composer-bin-plugin": "^1.5",
+        "expressionengine/flysystem": "1.x-dev",
+        "aws/aws-sdk-php": "3.337.x",
         "league/flysystem": "^1.0",
         "league/flysystem-aws-s3-v3": "^1.0"
     },
@@ -23,19 +25,32 @@
             "bamarni/composer-bin-plugin": true
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ExpressionEngine/flysystem"
+        }
+    ],
     "scripts": {
         "post-install-cmd": [
             "@composer bin all install --ansi",
+            "Aws\\Script\\Composer\\Composer::removeUnusedServices",
             "@prefix-dependencies"
         ],
         "post-update-cmd": [
             "@composer bin all update --ansi",
+            "Aws\\Script\\Composer\\Composer::removeUnusedServices",
             "@prefix-dependencies"
         ],
         "prefix-dependencies": [
             "vendor/bin/php-scoper add-prefix --output-dir=./vendor-build --force --quiet",
             "COMPOSER_VENDOR_DIR=vendor-build composer dump-autoload",
             "php scoper.fix.php"
+        ]
+    },
+    "extra": {
+        "aws/aws-sdk-php": [
+            "S3"
         ]
     }
 }

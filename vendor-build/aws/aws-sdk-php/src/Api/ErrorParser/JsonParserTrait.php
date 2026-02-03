@@ -14,10 +14,10 @@ trait JsonParserTrait
     private function genericHandler(ResponseInterface $response)
     {
         $code = (string) $response->getStatusCode();
-        if ($this->api && !\is_null($this->api->getMetadata('awsQueryCompatible')) && $response->getHeaderLine('x-amzn-query-error')) {
+        if ($this->api && !is_null($this->api->getMetadata('awsQueryCompatible')) && $response->getHeaderLine('x-amzn-query-error')) {
             $queryError = $response->getHeaderLine('x-amzn-query-error');
-            $parts = \explode(';', $queryError);
-            if (isset($parts) && \count($parts) == 2 && $parts[0] && $parts[1]) {
+            $parts = explode(';', $queryError);
+            if (isset($parts) && count($parts) == 2 && $parts[0] && $parts[1]) {
                 $error_code = $parts[0];
                 $error_type = $parts[1];
             }

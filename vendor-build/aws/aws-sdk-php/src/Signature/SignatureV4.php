@@ -5,6 +5,7 @@ namespace ExpressionEngine\Dependency\Aws\Signature;
 use ExpressionEngine\Dependency\Aws\Credentials\CredentialsInterface;
 use ExpressionEngine\Dependency\AWS\CRT\Auth\Signable;
 use ExpressionEngine\Dependency\AWS\CRT\Auth\SignatureType;
+use ExpressionEngine\Dependency\AWS\CRT\Auth\SignedBodyHeaderType;
 use ExpressionEngine\Dependency\AWS\CRT\Auth\Signing;
 use ExpressionEngine\Dependency\AWS\CRT\Auth\SigningAlgorithm;
 use ExpressionEngine\Dependency\AWS\CRT\Auth\SigningConfigAWS;
@@ -21,7 +22,7 @@ use ExpressionEngine\Dependency\Psr\Http\Message\RequestInterface;
 class SignatureV4 implements SignatureInterface
 {
     use SignatureTrait;
-    const ISO8601_BASIC = 'Ymd\\THis\\Z';
+    const ISO8601_BASIC = 'Ymd\THis\Z';
     const UNSIGNED_PAYLOAD = 'UNSIGNED-PAYLOAD';
     const AMZ_CONTENT_SHA256_HEADER = 'X-Amz-Content-Sha256';
     /** @var string */
@@ -62,8 +63,8 @@ class SignatureV4 implements SignatureInterface
      */
     public function signRequest(RequestInterface $request, CredentialsInterface $credentials, $signingService = null)
     {
-        $ldt = \gmdate(self::ISO8601_BASIC);
-        $sdt = \substr($ldt, 0, 8);
+        $ldt = gmdate(self::ISO8601_BASIC);
+        $sdt = substr($ldt, 0, 8);
         $parsed = $this->parseRequest($request);
         $parsed['headers']['X-Amz-Date'] = [$ldt];
         if ($token = $credentials->getSecurityToken()) {
@@ -81,7 +82,7 @@ class SignatureV4 implements SignatureInterface
         $context = $this->createContext($parsed, $payload);
         $toSign = $this->createStringToSign($ldt, $cs, $context['creq']);
         $signingKey = $this->getSigningKey($sdt, $this->region, $service, $credentials->getSecretKey());
-        $signature = \hash_hmac('sha256', $toSign, $signingKey);
+        $signature = hash_hmac('sha256', $toSign, $signingKey);
         $parsed['headers']['Authorization'] = ["AWS4-HMAC-SHA256 " . "Credential={$credentials->getAccessKeyId()}/{$cs}, " . "SignedHeaders={$context['headers']}, Signature={$signature}"];
         return $this->buildRequest($parsed);
     }
@@ -97,7 +98,7 @@ class SignatureV4 implements SignatureInterface
         $presignHeaders = [];
         $blacklist = $this->getHeaderBlacklist();
         foreach ($headers as $name => $value) {
-            $lName = \strtolower($name);
+            $lName = strtolower($name);
             if (!isset($blacklist[$lName]) && $name !== self::AMZ_CONTENT_SHA256_HEADER) {
                 $presignHeaders[] = $lName;
             }
@@ -109,15 +110,15 @@ class SignatureV4 implements SignatureInterface
      */
     public function presign(RequestInterface $request, CredentialsInterface $credentials, $expires, array $options = [])
     {
-        $startTimestamp = isset($options['start_time']) ? $this->convertToTimestamp($options['start_time'], null) : \time();
+        $startTimestamp = isset($options['start_time']) ? $this->convertToTimestamp($options['start_time'], null) : time();
         $expiresTimestamp = $this->convertToTimestamp($expires, $startTimestamp);
         if ($this->useV4a) {
             return $this->presignWithV4a($request, $credentials, $this->convertExpires($expiresTimestamp, $startTimestamp));
         }
         $parsed = $this->createPresignedRequest($request, $credentials);
         $payload = $this->getPresignedPayload($request);
-        $httpDate = \gmdate(self::ISO8601_BASIC, $startTimestamp);
-        $shortDate = \substr($httpDate, 0, 8);
+        $httpDate = gmdate(self::ISO8601_BASIC, $startTimestamp);
+        $shortDate = substr($httpDate, 0, 8);
         $scope = $this->createScope($shortDate, $this->region, $this->service);
         $credential = $credentials->getAccessKeyId() . '/' . $scope;
         if ($credentials->getSecurityToken()) {
@@ -125,13 +126,13 @@ class SignatureV4 implements SignatureInterface
         }
         $parsed['query']['X-Amz-Algorithm'] = 'AWS4-HMAC-SHA256';
         $parsed['query']['X-Amz-Credential'] = $credential;
-        $parsed['query']['X-Amz-Date'] = \gmdate('Ymd\\THis\\Z', $startTimestamp);
-        $parsed['query']['X-Amz-SignedHeaders'] = \implode(';', $this->getPresignHeaders($parsed['headers']));
+        $parsed['query']['X-Amz-Date'] = gmdate('Ymd\THis\Z', $startTimestamp);
+        $parsed['query']['X-Amz-SignedHeaders'] = implode(';', $this->getPresignHeaders($parsed['headers']));
         $parsed['query']['X-Amz-Expires'] = $this->convertExpires($expiresTimestamp, $startTimestamp);
         $context = $this->createContext($parsed, $payload);
         $stringToSign = $this->createStringToSign($httpDate, $scope, $context['creq']);
         $key = $this->getSigningKey($shortDate, $this->region, $this->service, $credentials->getSecretKey());
-        $parsed['query']['X-Amz-Signature'] = \hash_hmac('sha256', $stringToSign, $key);
+        $parsed['query']['X-Amz-Signature'] = hash_hmac('sha256', $stringToSign, $key);
         return $this->buildRequest($parsed);
     }
     /**
@@ -183,12 +184,12 @@ class SignatureV4 implements SignatureInterface
     }
     protected function createCanonicalizedPath($path)
     {
-        $doubleEncoded = \rawurlencode(\ltrim($path, '/'));
-        return '/' . \str_replace('%2F', '/', $doubleEncoded);
+        $doubleEncoded = rawurlencode(ltrim($path, '/'));
+        return '/' . str_replace('%2F', '/', $doubleEncoded);
     }
     private function createStringToSign($longDate, $credentialScope, $creq)
     {
-        $hash = \hash('sha256', $creq);
+        $hash = hash('sha256', $creq);
         return "AWS4-HMAC-SHA256\n{$longDate}\n{$credentialScope}\n{$hash}";
     }
     private function createPresignedRequest(RequestInterface $request, CredentialsInterface $credentials)
@@ -213,23 +214,23 @@ class SignatureV4 implements SignatureInterface
         // Case-insensitively aggregate all of the headers.
         $aggregate = [];
         foreach ($parsedRequest['headers'] as $key => $values) {
-            $key = \strtolower($key);
+            $key = strtolower($key);
             if (!isset($blacklist[$key])) {
                 foreach ($values as $v) {
                     $aggregate[$key][] = $v;
                 }
             }
         }
-        \ksort($aggregate);
+        ksort($aggregate);
         $canonHeaders = [];
         foreach ($aggregate as $k => $v) {
-            if (\count($v) > 0) {
-                \sort($v);
+            if (count($v) > 0) {
+                sort($v);
             }
-            $canonHeaders[] = $k . ':' . \preg_replace('/\\s+/', ' ', \implode(',', $v));
+            $canonHeaders[] = $k . ':' . preg_replace('/\s+/', ' ', implode(',', $v));
         }
-        $signedHeadersString = \implode(';', \array_keys($aggregate));
-        $canon .= \implode("\n", $canonHeaders) . "\n\n" . $signedHeadersString . "\n" . $payload;
+        $signedHeadersString = implode(';', array_keys($aggregate));
+        $canon .= implode("\n", $canonHeaders) . "\n\n" . $signedHeadersString . "\n" . $payload;
         return ['creq' => $canon, 'headers' => $signedHeadersString];
     }
     private function getCanonicalizedQuery(array $query)
@@ -239,25 +240,25 @@ class SignatureV4 implements SignatureInterface
             return '';
         }
         $qs = '';
-        \ksort($query);
+        ksort($query);
         foreach ($query as $k => $v) {
-            if (!\is_array($v)) {
-                $qs .= \rawurlencode($k) . '=' . \rawurlencode($v !== null ? $v : '') . '&';
+            if (!is_array($v)) {
+                $qs .= rawurlencode($k) . '=' . rawurlencode($v !== null ? $v : '') . '&';
             } else {
-                \sort($v);
+                sort($v);
                 foreach ($v as $value) {
-                    $qs .= \rawurlencode($k) . '=' . \rawurlencode($value !== null ? $value : '') . '&';
+                    $qs .= rawurlencode($k) . '=' . rawurlencode($value !== null ? $value : '') . '&';
                 }
             }
         }
-        return \substr($qs, 0, -1);
+        return substr($qs, 0, -1);
     }
     private function convertToTimestamp($dateValue, $relativeTimeBase = null)
     {
         if ($dateValue instanceof \DateTimeInterface) {
             $timestamp = $dateValue->getTimestamp();
-        } elseif (!\is_numeric($dateValue)) {
-            $timestamp = \strtotime($dateValue, $relativeTimeBase === null ? \time() : $relativeTimeBase);
+        } elseif (!is_numeric($dateValue)) {
+            $timestamp = strtotime($dateValue, $relativeTimeBase === null ? time() : $relativeTimeBase);
         } else {
             $timestamp = $dateValue;
         }
@@ -277,12 +278,12 @@ class SignatureV4 implements SignatureInterface
         //x-amz-user-agent shouldn't be put in a query param
         unset($parsedRequest['headers']['X-Amz-User-Agent']);
         foreach ($parsedRequest['headers'] as $name => $header) {
-            $lname = \strtolower($name);
-            if (\substr($lname, 0, 5) == 'x-amz') {
+            $lname = strtolower($name);
+            if (substr($lname, 0, 5) == 'x-amz') {
                 $parsedRequest['query'][$name] = $header;
             }
             $blacklist = $this->getHeaderBlacklist();
-            if (isset($blacklist[$lname]) || $lname === \strtolower(self::AMZ_CONTENT_SHA256_HEADER)) {
+            if (isset($blacklist[$lname]) || $lname === strtolower(self::AMZ_CONTENT_SHA256_HEADER)) {
                 unset($parsedRequest['headers'][$name]);
             }
         }
@@ -303,13 +304,13 @@ class SignatureV4 implements SignatureInterface
         }
         return new Psr7\Request($req['method'], $req['uri'], $req['headers'], $req['body'], $req['version']);
     }
-    private function verifyCRTLoaded()
+    protected function verifyCRTLoaded()
     {
-        if (!\extension_loaded('awscrt')) {
+        if (!extension_loaded('awscrt')) {
             throw new CommonRuntimeException("AWS Common Runtime for PHP is required to use Signature V4A" . ".  Please install it using the instructions found at" . " https://github.com/aws/aws-sdk-php/blob/master/CRT_INSTRUCTIONS.md");
         }
     }
-    private function createCRTStaticCredentialsProvider($credentials)
+    protected function createCRTStaticCredentialsProvider($credentials)
     {
         return new StaticCredentialsProvider(['access_key_id' => $credentials->getAccessKeyId(), 'secret_access_key' => $credentials->getSecretKey(), 'session_token' => $credentials->getSecurityToken()]);
     }
@@ -332,7 +333,7 @@ class SignatureV4 implements SignatureInterface
             (string) $request->getUri(),
             [],
             //leave empty as the query is parsed from the uri object
-            \array_map(function ($header) {
+            array_map(function ($header) {
                 return $header[0];
             }, $request->getHeaders())
         );
@@ -341,16 +342,16 @@ class SignatureV4 implements SignatureInterface
      * @param CredentialsInterface $credentials
      * @param RequestInterface $request
      * @param $signingService
+     * @param SigningConfigAWS|null $signingConfig
      * @return RequestInterface
      */
-    protected function signWithV4a(CredentialsInterface $credentials, RequestInterface $request, $signingService)
+    protected function signWithV4a(CredentialsInterface $credentials, RequestInterface $request, $signingService, ?SigningConfigAWS $signingConfig = null)
     {
         $this->verifyCRTLoaded();
-        $credentials_provider = $this->createCRTStaticCredentialsProvider($credentials);
-        $signingConfig = new SigningConfigAWS(['algorithm' => SigningAlgorithm::SIGv4_ASYMMETRIC, 'signature_type' => SignatureType::HTTP_REQUEST_HEADERS, 'credentials_provider' => $credentials_provider, 'signed_body_value' => $this->getPayload($request), 'region' => "*", 'service' => $signingService, 'date' => \time()]);
+        $signingConfig = $signingConfig ?? new SigningConfigAWS(['algorithm' => SigningAlgorithm::SIGv4_ASYMMETRIC, 'signature_type' => SignatureType::HTTP_REQUEST_HEADERS, 'credentials_provider' => $this->createCRTStaticCredentialsProvider($credentials), 'signed_body_value' => $this->getPayload($request), 'should_normalize_uri_path' => \true, 'use_double_uri_encode' => \true, 'region' => $this->region, 'service' => $signingService, 'date' => time()]);
         $removedIllegalHeaders = $this->removeIllegalV4aHeaders($request);
         $http_request = $this->CRTRequestFromGuzzleRequest($request);
-        Signing::signRequestAws(Signable::fromHttpRequest($http_request), $signingConfig, function ($signing_result, $error_code) use(&$http_request) {
+        Signing::signRequestAws(Signable::fromHttpRequest($http_request), $signingConfig, function ($signing_result, $error_code) use (&$http_request) {
             $signing_result->applyToHttpRequest($http_request);
         });
         foreach ($removedIllegalHeaders as $header => $value) {
@@ -366,7 +367,7 @@ class SignatureV4 implements SignatureInterface
     {
         $this->verifyCRTLoaded();
         $credentials_provider = $this->createCRTStaticCredentialsProvider($credentials);
-        $signingConfig = new SigningConfigAWS(['algorithm' => SigningAlgorithm::SIGv4_ASYMMETRIC, 'signature_type' => SignatureType::HTTP_REQUEST_QUERY_PARAMS, 'credentials_provider' => $credentials_provider, 'signed_body_value' => $this->getPresignedPayload($request), 'region' => "*", 'service' => $this->service, 'date' => \time(), 'expiration_in_seconds' => $expires]);
+        $signingConfig = new SigningConfigAWS(['algorithm' => SigningAlgorithm::SIGv4_ASYMMETRIC, 'signature_type' => SignatureType::HTTP_REQUEST_QUERY_PARAMS, 'credentials_provider' => $credentials_provider, 'signed_body_value' => $this->getPresignedPayload($request), 'region' => "*", 'service' => $this->service, 'date' => time(), 'expiration_in_seconds' => $expires]);
         $this->removeIllegalV4aHeaders($request);
         foreach ($this->getHeaderBlacklist() as $headerName => $headerValue) {
             if ($request->hasHeader($headerName)) {
@@ -374,7 +375,7 @@ class SignatureV4 implements SignatureInterface
             }
         }
         $http_request = $this->CRTRequestFromGuzzleRequest($request);
-        Signing::signRequestAws(Signable::fromHttpRequest($http_request), $signingConfig, function ($signing_result, $error_code) use(&$http_request) {
+        Signing::signRequestAws(Signable::fromHttpRequest($http_request), $signingConfig, function ($signing_result, $error_code) use (&$http_request) {
             $signing_result->applyToHttpRequest($http_request);
         });
         return $request->withUri(new Psr7\Uri($http_request->pathAndQuery()));

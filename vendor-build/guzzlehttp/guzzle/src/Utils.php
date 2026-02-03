@@ -18,7 +18,7 @@ final class Utils
      * @return string Returns a string containing the type of the variable and
      *                if a class is provided, the class name.
      */
-    public static function describeType($input) : string
+    public static function describeType($input): string
     {
         switch (\gettype($input)) {
             case 'object':
@@ -40,7 +40,7 @@ final class Utils
      * @param iterable $lines Header lines array of strings in the following
      *                        format: "Name: Value"
      */
-    public static function headersFromLines(iterable $lines) : array
+    public static function headersFromLines(iterable $lines): array
     {
         $headers = [];
         foreach ($lines as $line) {
@@ -64,21 +64,21 @@ final class Utils
         if (\defined('STDOUT')) {
             return \STDOUT;
         }
-        return \ExpressionEngine\Dependency\GuzzleHttp\Psr7\Utils::tryFopen('php://output', 'w');
+        return Psr7\Utils::tryFopen('php://output', 'w');
     }
     /**
      * Chooses and creates a default handler to use based on the environment.
      *
      * The returned handler is not wrapped by any default middlewares.
      *
-     * @return callable(\Psr\Http\Message\RequestInterface, array): \GuzzleHttp\Promise\PromiseInterface Returns the best handler for the given system.
+     * @return callable(\Psr\Http\Message\RequestInterface, array): Promise\PromiseInterface Returns the best handler for the given system.
      *
      * @throws \RuntimeException if no viable Handler is available.
      */
-    public static function chooseHandler() : callable
+    public static function chooseHandler(): callable
     {
         $handler = null;
-        if (\defined('CURLOPT_CUSTOMREQUEST')) {
+        if (\defined('CURLOPT_CUSTOMREQUEST') && \function_exists('curl_version') && version_compare(curl_version()['version'], '7.21.2') >= 0) {
             if (\function_exists('curl_multi_exec') && \function_exists('curl_exec')) {
                 $handler = Proxy::wrapSync(new CurlMultiHandler(), new CurlHandler());
             } elseif (\function_exists('curl_exec')) {
@@ -97,9 +97,9 @@ final class Utils
     /**
      * Get the default User-Agent string to use with Guzzle.
      */
-    public static function defaultUserAgent() : string
+    public static function defaultUserAgent(): string
     {
-        return \sprintf('GuzzleHttp/%d', ClientInterface::MAJOR_VERSION);
+        return sprintf('GuzzleHttp/%d', ClientInterface::MAJOR_VERSION);
     }
     /**
      * Returns the default cacert bundle for the current system.
@@ -116,7 +116,7 @@ final class Utils
      *
      * @deprecated Utils::defaultCaBundle will be removed in guzzlehttp/guzzle:8.0. This method is not needed in PHP 5.6+.
      */
-    public static function defaultCaBundle() : string
+    public static function defaultCaBundle(): string
     {
         static $cached = null;
         static $cafiles = [
@@ -133,8 +133,8 @@ final class Utils
             // Google app engine
             '/etc/ca-certificates.crt',
             // Windows?
-            'C:\\windows\\system32\\curl-ca-bundle.crt',
-            'C:\\windows\\curl-ca-bundle.crt',
+            'C:\windows\system32\curl-ca-bundle.crt',
+            'C:\windows\curl-ca-bundle.crt',
         ];
         if ($cached) {
             return $cached;
@@ -155,14 +155,13 @@ No system CA bundle could be found in any of the the common system locations.
 PHP versions earlier than 5.6 are not properly configured to use the system's
 CA bundle by default. In order to verify peer certificates, you will need to
 supply the path on disk to a certificate bundle to the 'verify' request
-option: http://docs.guzzlephp.org/en/latest/clients.html#verify. If you do not
-need a specific certificate bundle, then Mozilla provides a commonly used CA
-bundle which can be downloaded here (provided by the maintainer of cURL):
-https://curl.haxx.se/ca/cacert.pem. Once
-you have a CA bundle available on disk, you can set the 'openssl.cafile' PHP
-ini setting to point to the path to the file, allowing you to omit the 'verify'
-request option. See https://curl.haxx.se/docs/sslcerts.html for more
-information.
+option: https://docs.guzzlephp.org/en/latest/request-options.html#verify. If
+you do not need a specific certificate bundle, then Mozilla provides a commonly
+used CA bundle which can be downloaded here (provided by the maintainer of
+cURL): https://curl.haxx.se/ca/cacert.pem. Once you have a CA bundle available
+on disk, you can set the 'openssl.cafile' PHP ini setting to point to the path
+to the file, allowing you to omit the 'verify' request option. See
+https://curl.haxx.se/docs/sslcerts.html for more information.
 EOT
 );
     }
@@ -170,7 +169,7 @@ EOT
      * Creates an associative array of lowercase header names to the actual
      * header casing.
      */
-    public static function normalizeHeaderKeys(array $headers) : array
+    public static function normalizeHeaderKeys(array $headers): array
     {
         $result = [];
         foreach (\array_keys($headers) as $key) {
@@ -197,7 +196,7 @@ EOT
      *
      * @throws InvalidArgumentException
      */
-    public static function isHostInNoProxy(string $host, array $noProxyArray) : bool
+    public static function isHostInNoProxy(string $host, array $noProxyArray): bool
     {
         if (\strlen($host) === 0) {
             throw new InvalidArgumentException('Empty host provided');
@@ -260,7 +259,7 @@ EOT
      *
      * @see https://www.php.net/manual/en/function.json-encode.php
      */
-    public static function jsonEncode($value, int $options = 0, int $depth = 512) : string
+    public static function jsonEncode($value, int $options = 0, int $depth = 512): string
     {
         $json = \json_encode($value, $options, $depth);
         if (\JSON_ERROR_NONE !== \json_last_error()) {
@@ -277,7 +276,7 @@ EOT
      *
      * @internal
      */
-    public static function currentTime() : float
+    public static function currentTime(): float
     {
         return (float) \function_exists('hrtime') ? \hrtime(\true) / 1000000000.0 : \microtime(\true);
     }
@@ -286,24 +285,24 @@ EOT
      *
      * @internal
      */
-    public static function idnUriConvert(UriInterface $uri, int $options = 0) : UriInterface
+    public static function idnUriConvert(UriInterface $uri, int $options = 0): UriInterface
     {
         if ($uri->getHost()) {
             $asciiHost = self::idnToAsci($uri->getHost(), $options, $info);
             if ($asciiHost === \false) {
                 $errorBitSet = $info['errors'] ?? 0;
-                $errorConstants = \array_filter(\array_keys(\get_defined_constants()), static function (string $name) : bool {
-                    return \substr($name, 0, 11) === 'IDNA_ERROR_';
+                $errorConstants = array_filter(array_keys(get_defined_constants()), static function (string $name): bool {
+                    return substr($name, 0, 11) === 'IDNA_ERROR_';
                 });
                 $errors = [];
                 foreach ($errorConstants as $errorConstant) {
-                    if ($errorBitSet & \constant($errorConstant)) {
+                    if ($errorBitSet & constant($errorConstant)) {
                         $errors[] = $errorConstant;
                     }
                 }
                 $errorMessage = 'IDN conversion failed';
                 if ($errors) {
-                    $errorMessage .= ' (errors: ' . \implode(', ', $errors) . ')';
+                    $errorMessage .= ' (errors: ' . implode(', ', $errors) . ')';
                 }
                 throw new InvalidArgumentException($errorMessage);
             }
@@ -317,7 +316,7 @@ EOT
     /**
      * @internal
      */
-    public static function getenv(string $name) : ?string
+    public static function getenv(string $name): ?string
     {
         if (isset($_SERVER[$name])) {
             return (string) $_SERVER[$name];

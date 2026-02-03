@@ -5,7 +5,6 @@ namespace ExpressionEngine\Dependency\Aws\Crypto\Polyfill;
 use ExpressionEngine\Dependency\Aws\Exception\CryptoPolyfillException;
 /**
  * Trait NeedsTrait
- * @package Aws\Crypto\Polyfill
  */
 trait NeedsTrait
 {

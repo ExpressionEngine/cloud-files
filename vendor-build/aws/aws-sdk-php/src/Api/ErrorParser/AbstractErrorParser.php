@@ -19,11 +19,11 @@ abstract class AbstractErrorParser
     /**
      * @param Service $api
      */
-    public function __construct(Service $api = null)
+    public function __construct(?Service $api = null)
     {
         $this->api = $api;
     }
-    protected abstract function payload(ResponseInterface $response, StructureShape $member);
+    abstract protected function payload(ResponseInterface $response, StructureShape $member);
     protected function extractPayload(StructureShape $member, ResponseInterface $response)
     {
         if ($member instanceof StructureShape) {
@@ -34,7 +34,7 @@ abstract class AbstractErrorParser
             return $response->getBody();
         }
     }
-    protected function populateShape(array &$data, ResponseInterface $response, CommandInterface $command = null)
+    protected function populateShape(array &$data, ResponseInterface $response, ?CommandInterface $command = null)
     {
         $data['body'] = [];
         if (!empty($command) && !empty($this->api)) {

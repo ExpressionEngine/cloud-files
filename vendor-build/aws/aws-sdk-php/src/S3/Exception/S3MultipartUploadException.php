@@ -23,7 +23,7 @@ class S3MultipartUploadException extends \ExpressionEngine\Dependency\Aws\Except
      */
     public function __construct(UploadState $state, $prev = null)
     {
-        if (\is_array($prev) && ($error = $prev[\key($prev)])) {
+        if (is_array($prev) && $error = $prev[key($prev)]) {
             $this->collectPathInfo($error->getCommand());
         } elseif ($prev instanceof AwsException) {
             $this->collectPathInfo($prev->getCommand());

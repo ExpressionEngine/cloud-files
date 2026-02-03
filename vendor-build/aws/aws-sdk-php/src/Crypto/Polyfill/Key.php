@@ -6,8 +6,6 @@ namespace ExpressionEngine\Dependency\Aws\Crypto\Polyfill;
  * Class Key
  *
  * Wraps a string to keep it hidden from stack traces.
- *
- * @package Aws\Crypto\Polyfill
  */
 class Key
 {
@@ -44,7 +42,7 @@ class Key
      */
     public function __destruct()
     {
-        if (\extension_loaded('sodium') && \function_exists('sodium_memzero')) {
+        if (extension_loaded('sodium') && function_exists('sodium_memzero')) {
             try {
                 \sodium_memzero($this->internalString);
             } catch (\SodiumException $ex) {
@@ -65,7 +63,7 @@ class Key
      */
     public function length()
     {
-        if (\is_callable('\\mb_strlen')) {
+        if (\is_callable('\mb_strlen')) {
             return (int) \mb_strlen($this->internalString, '8bit');
         }
         return (int) \strlen($this->internalString);

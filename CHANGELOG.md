@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-02-03
+
 ### Added
 
 - Filesystem Adapter for integrating with Backblaze B2 service
@@ -40,7 +42,9 @@
 
 - ExpressionEngine Filesystem adapters for AWS S3 and DigitalOcean Spaces
 
-[Unreleased]: https://github.com/ExpressionEngine/cloud-files/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/ExpressionEngine/cloud-files/compare/1.1.1...HEAD
+
+[1.1.1]: https://github.com/ExpressionEngine/cloud-files/compare/1.1.0...1.1.1
 
 [1.1.0]: https://github.com/ExpressionEngine/cloud-files/compare/1.0.2...1.1.0
 
